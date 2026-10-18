@@ -1023,22 +1023,32 @@
     background: var(--lure-hex);
     color: #062229;
     font-size: 2rem;
-    box-shadow: 0 5px 0 var(--ink-line), 0 0 0 0 rgba(var(--lure), 0);
-    animation: go-breathe 2.8s ease-in-out infinite;
+    position: relative;
+    isolation: isolate;
+    box-shadow: 0 5px 0 var(--ink-line);
+  }
+  .hb-go::after {
+    content: "";
+    position: absolute;
+    inset: -3px;
+    z-index: -1;
+    border-radius: inherit;
+    box-shadow: 0 0 34px 10px rgba(var(--lure), 0.6);
+    animation: go-glow 2.8s ease-in-out infinite;
+    pointer-events: none;
   }
   .hb-go:hover { background: #8AF0E2; }
   .hb-go:active { transform: translateY(3px); box-shadow: 0 2px 0 var(--ink-line); }
   .hb-go:focus-visible { outline: 3px solid #FFFFFF; outline-offset: 4px; }
   .hb-go svg { width: 1.1em; height: 1.1em; }
-  @keyframes go-breathe {
-    0%, 100% { box-shadow: 0 5px 0 var(--ink-line), 0 0 14px 2px rgba(var(--lure), 0.35); }
-    50% { box-shadow: 0 5px 0 var(--ink-line), 0 0 34px 10px rgba(var(--lure), 0.6); }
-  }
-  .hb-go[aria-disabled="true"] { background: var(--sea-panel); color: var(--sea-muted); animation: none; box-shadow: 0 5px 0 var(--ink-line); opacity: 0.7; }
+  @keyframes go-glow { 0%, 100% { opacity: 0.4; } 50% { opacity: 1; } }
+  .hb-go[aria-disabled="true"] { background: var(--sea-panel); color: var(--sea-muted); box-shadow: 0 5px 0 var(--ink-line); opacity: 0.7; }
+  .hb-go[aria-disabled="true"]::after { display: none; }
   .hb-go[aria-disabled="true"]:hover { background: var(--sea-panel); }
   html[data-font="clear"] .hb-go { font-size: 1.45rem; font-weight: 700; }
-  html[data-motion="reduce"] .hb-go { animation: none; box-shadow: 0 5px 0 var(--ink-line), 0 0 24px 6px rgba(var(--lure), 0.5); }
-  html[data-effects="reduce"] .hb-go { animation: none; background: var(--lure-hex); border-color: #FFFFFF; box-shadow: 0 5px 0 #FFFFFF; }
+  html[data-motion="reduce"] .hb-go::after { animation: none; opacity: 0.8; }
+  html[data-effects="reduce"] .hb-go { background: var(--lure-hex); border-color: #FFFFFF; box-shadow: 0 5px 0 #FFFFFF; }
+  html[data-effects="reduce"] .hb-go::after { display: none; }
   html[data-effects="reduce"] .hb-go[aria-disabled="true"] { background: #06131B; color: #E2F0F0; border-color: var(--lure-hex); }
 
   .hb-go-sm { padding: 0.35rem 1.8rem 0.5rem; font-size: 1.65rem; }
@@ -1210,7 +1220,7 @@
     90% { transform: scale(0.88, 0.94); }
     100% { opacity: 1; transform: scale(1); }
   }
-  .card > .card-over { position: absolute; inset: 0; width: 100%; height: 100%; filter: none; opacity: 0; transition: opacity 0.35s ease; }
+  .card > .card-over { position: absolute; inset: 0; width: 100%; height: 100%; filter: drop-shadow(0 0 0 transparent); opacity: 0; transition: opacity 0.35s ease; }
   .card > .card-over.is-in { opacity: 1; }
   .card.is-hit { animation: card-hit 0.28s ease-out; }
   @keyframes card-hit {
@@ -1387,8 +1397,8 @@
     transform: translateY(-50%);
     transition: opacity 0.45s ease, translate 0.45s var(--ease-gear);
   }
-  .case-arrow.prev { left: max(12px, calc((100vw - var(--card-w)) / 2 - 5.4rem)); translate: -50px 0; }
-  .case-arrow.next { right: max(12px, calc((100vw - var(--card-w)) / 2 - 5.4rem)); translate: 50px 0; }
+  .case-arrow.prev { left: max(12px, calc((100vw - var(--card-w)) / 2 - 7.6rem)); translate: -50px 0; }
+  .case-arrow.next { right: max(12px, calc((100vw - var(--card-w)) / 2 - 7.6rem)); translate: 50px 0; }
   .case-arrow.prev svg { scale: -1 1; }
   .is-research .case-arrow { opacity: 1; translate: 0 0; pointer-events: auto; }
   .case-arrow svg { display: block; width: 100%; height: 100%; overflow: visible; }
@@ -1452,21 +1462,26 @@
   .disclaimer {
     position: absolute;
     z-index: 19;
-    left: calc(12px + env(safe-area-inset-left, 0px));
-    bottom: calc(10px + env(safe-area-inset-bottom, 0px));
+    left: 50%;
+    bottom: calc(12px + env(safe-area-inset-bottom, 0px));
     width: max-content;
-    max-width: min(19rem, calc(100vw - 32px));
+    max-width: calc(100vw - 32px);
     margin: 0;
     padding: 0.15rem 0.7rem 0.2rem;
     border-radius: 6px;
     background: rgba(4, 12, 18, 0.55);
     color: rgba(221, 234, 232, 0.75);
-    font-family: var(--font-clear);
-    font-size: 0.75rem;
-    line-height: 1.4;
-    text-align: left;
+    font-family: var(--font-ui);
+    font-size: 1rem;
+    line-height: 1.35;
+    text-align: center;
+    transform: translateX(-50%);
     pointer-events: none;
+    transition: opacity 0.5s ease, visibility 0s linear 0s;
   }
+  /* Only on the desk */
+  body.case-open .disclaimer { opacity: 0; visibility: hidden; transition: opacity 0.4s ease, visibility 0s linear 0.4s; }
+  html[data-font="clear"] .disclaimer { font-size: 0.85rem; }
   html[data-effects="reduce"] .disclaimer { background: #06131B; color: #E2F0F0; }
   .screen { padding-bottom: 56px; }
 
@@ -1711,7 +1726,7 @@
           <li class="lab-row stack" data-fix="terms">
             <div><label for="fix-terms">Make the terms readable<span class="done-tick" aria-hidden="true">✓</span></label><span class="hint-text">Bigger, darker and in plain words, with online cancelling.</span></div>
             <input class="terms-range" type="range" id="fix-terms" min="0" max="2" step="1" value="0" aria-valuetext="Tiny">
-            <div class="range-labels" aria-hidden="true"><span>Tiny</span><span>Small</span><span>Acceptable</span></div>
+            <div class="range-labels" aria-hidden="true"><span>Tiny</span><span>Small</span><span>Clear</span></div>
           </li>
         </ul>
         <div class="gauge-row">
@@ -2068,6 +2083,8 @@
       slot.innerHTML = '';
       const wrap = makeOffer();
       wrap.classList.add('glow-off');
+      wrap.inert = true;
+      wrap.addEventListener('animationend', (e) => { if (e.target === wrap && wrap.closest('.is-luring')) wrap.inert = false; });
       slot.append(wrap);
       dive.querySelector('[data-stage="reveal"]').classList.remove('enter-anim', 'lure-leaving', 'is-holding');
       fillRevealText(true, true);
@@ -2092,6 +2109,7 @@
       /* 2. The dark painting dissolves into the lit one, revealing the anglerfish */
       later(() => {
         screenEl.classList.add('is-holding');
+        armFx(screenEl);
         screenEl.classList.remove('is-luring', 'lure-leaving', 'enter-anim');
         dive.classList.add('is-lit', 'keep-dark');
         dive.dataset.bg = 'lit';
@@ -2103,7 +2121,8 @@
         screenEl.classList.remove('is-holding');
         void screenEl.offsetWidth;
         screenEl.classList.add('enter-anim');
-      }, quick ? 160 : 3150);
+        armFx(screenEl);
+      }, quick ? 160 : 2575);
     }
     function startClock(el) {
       let secs = 299;
@@ -2164,6 +2183,7 @@
         screenEl.classList.remove('enter-anim');
         void screenEl.offsetWidth;
         screenEl.classList.add('enter-anim');
+        armFx(screenEl);
       }
       document.querySelectorAll('.reveal-layout .tricks li').forEach((li) => li.classList.remove('is-shown', 'is-current'));
       document.getElementById('reveal-count').textContent = 'This offer is hiding six tricks!';
@@ -2243,7 +2263,7 @@
       labOffer.querySelector('.decline-text').textContent = WORDING[document.querySelector('input[name="fix-wording"]:checked').value];
       const termsLevel = Number(get('fix-terms').value);
       labOffer.dataset.terms = termsLevel;
-      get('fix-terms').setAttribute('aria-valuetext', ['Tiny', 'Small', 'Acceptable'][termsLevel]);
+      get('fix-terms').setAttribute('aria-valuetext', ['Tiny', 'Small', 'Clear'][termsLevel]);
       labOffer.querySelector('.fine-text').textContent = termsLevel === 2 ? HONEST_TERMS : labOffer.dataset.originalTerms;
 
       const count = Object.values(fixes).filter(Boolean).length;
@@ -2270,6 +2290,15 @@
       returnToCard();
     });
 
+
+    /* Anything that fades in stays unclickable (and out of the Tab order) until it's fully visible */
+    function armFx(screenEl) {
+      screenEl.querySelectorAll('.fx').forEach((el) => { el.inert = true; });
+    }
+    dive.addEventListener('animationend', (e) => {
+      const el = e.target;
+      if (el.classList && el.classList.contains('fx') && /^fx-/.test(e.animationName)) el.inert = false;
+    });
 
     /* Switch screens with no fades of their own, for use underneath the fade to black */
     function goInstant(name) {
