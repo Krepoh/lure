@@ -9,7 +9,7 @@ In LURE, you open a case file at a deep-sea research desk, dive into the dark, a
 After collecting your data, you're able to use the Redesign Lab to... well, redesign it!
 
 ## Play
-Open [link], or download this repository and open `index.html` in a browser. It's built for desktop.
+Open https://krepoh.github.io/lure/, or download this repository and open `index.html` in a browser. It's built for desktop only.
 
 ## Features
 Case 001: The Anglerfish — hidden costs and misleading subscription offers
