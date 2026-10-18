@@ -1,0 +1,2690 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="LURE: an interactive deep-sea investigation into deceptive design. Fall for the bait, uncover the tricks, then redesign the offer.">
+<style>body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
+<title>LURE Research Desk</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,700;9..40,800&family=Patrick+Hand&display=swap">
+<script>
+  /* Settings are applied before anything paints. Defaults follow the computer's own settings. */
+  (() => {
+    const root = document.documentElement;
+    let saved = {};
+    try { saved = JSON.parse(localStorage.getItem('lure-settings') || '{}'); } catch (e) {}
+    const osReduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const osContrast = window.matchMedia('(prefers-contrast: more)').matches;
+    root.dataset.motion = saved.motion ?? (osReduce ? 'reduce' : 'full');
+    root.dataset.text = saved.text ?? 'normal';
+    root.dataset.effects = saved.effects ?? (osContrast ? 'reduce' : 'full');
+    root.dataset.font = saved.font ?? 'hand';
+  })();
+</script>
+<style>
+  /* Layout: one 1440x900 stage that covers the window like a background (pinned to the bottom, sides trimmed a little on narrow windows); phones in portrait show the whole desk.
+     Lighting: cool deep-sea room with faint light shafts and drifting particles; a warm lamp pool on the desk centered on the folder; blue spill from the aquarium; darker desk edges and a soft vignette.
+     Settings: html[data-motion], html[data-text], html[data-effects] switch every screen at once. All reading text uses rem so "Larger text" scales it. */
+  :root {
+    --abyss: #0E1A24;
+    --deep-teal: #16313A;
+    --paper: #E8DCC0;
+    --parchment: #C9B48E;
+    --ink: #3A2E26;
+    --brass: #B08A4A;
+    --lure-hex: #5FE3D0;
+    --teal-ink: #16707A;
+    --lure: 95, 227, 208;
+    --lamp: 242, 196, 109;
+    --tank: 110, 175, 255;
+    --font-hand: "Patrick Hand", "Comic Neue", "Segoe Print", system-ui, sans-serif;
+    --font-clear: "Atkinson Hyperlegible", system-ui, sans-serif;
+    --font-ui: var(--font-hand);
+    --ink-line: #24323F;
+    --sea-panel: #1D4155;
+    --sea-raised: #2B5F75;
+    --sea-text: #E4F1EE;
+    --sea-muted: #A9C7CB;
+    --sea-accent: #63B9B0;
+    --track-off: #14303F;
+    --wobble: 14px 20px 12px 22px / 20px 12px 22px 14px;
+    --wobble-sm: 8px 11px 7px 12px / 11px 7px 12px 8px;
+    --ease-gear: cubic-bezier(0.65, 0, 0.35, 1);
+    --stage-w: clamp(100vw, 160vh, 125vw);
+    --desk-drop: 6%;
+    color-scheme: dark;
+  }
+  html { font-size: 100%; }
+  html[data-text="large"] { font-size: 125%; }
+  html[data-font="clear"] { --font-ui: var(--font-clear); }
+  html, body { height: 100%; }
+  body { margin: 0; }
+  [hidden] { display: none !important; }
+  body {
+    background: var(--abyss);
+    color: var(--paper);
+    overflow: hidden;
+    position: relative;
+    font-family: var(--font-ui);
+    font-size: 1rem;
+  }
+
+  .room {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+    background:
+      radial-gradient(ellipse 65% 55% at 50% 8%, rgba(46, 98, 110, 0.55) 0%, rgba(22, 49, 58, 0.35) 45%, transparent 80%),
+      radial-gradient(ellipse 45% 55% at 10% 22%, rgba(24, 78, 84, 0.35), transparent 70%),
+      radial-gradient(ellipse 45% 55% at 90% 28%, rgba(32, 58, 96, 0.35), transparent 70%),
+      linear-gradient(to bottom, #183A48 0%, #12283A 40%, #0E1A24 70%, #091118 100%);
+  }
+  .desk-group { transform: translateY(var(--desk-drop)); }
+  .ray {
+    position: absolute;
+    top: -15%;
+    height: 85vh;
+    background: linear-gradient(to bottom, rgba(150, 235, 225, 0.16), rgba(150, 235, 225, 0.05) 55%, transparent 85%);
+    filter: blur(22px);
+    transform-origin: top center;
+    mix-blend-mode: screen;
+    animation: sway 14s ease-in-out infinite;
+  }
+  .ray:nth-child(1) { left: 26%; width: 9vw; --tilt: 14deg; animation-delay: -3s; }
+  .ray:nth-child(2) { left: 45%; width: 14vw; --tilt: 9deg; animation-duration: 18s; }
+  .ray:nth-child(3) { left: 63%; width: 7vw; --tilt: 4deg; animation-delay: -8s; animation-duration: 16s; }
+  @keyframes sway {
+    0%, 100% { opacity: 0.45; transform: rotate(var(--tilt)); }
+    50% { opacity: 1; transform: rotate(calc(var(--tilt) + 4deg)); }
+  }
+  .snow { position: absolute; inset: 0; width: 100%; height: 100%; }
+
+  .stage {
+    position: absolute;
+    left: 50%;
+    bottom: 0;
+    transform: translateX(-50%);
+    width: var(--stage-w);
+    aspect-ratio: 1440 / 900;
+  }
+  .hint {
+    display: none;
+    position: absolute;
+    top: calc(24px + env(safe-area-inset-top, 0px));
+    left: 0;
+    right: 0;
+    margin: 0;
+    padding-inline: 24px;
+    text-align: center;
+    font-size: 1.05rem;
+    line-height: 1.5;
+    color: var(--sea-muted);
+    z-index: 2;
+  }
+  @media (max-aspect-ratio: 3/4) {
+    :root { --stage-w: 100vw; }
+  }
+  .layer {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    user-select: none;
+  }
+
+  .wall-spill {
+    background:
+      radial-gradient(ellipse 22% 30% at 14% 44%, rgba(var(--tank), 0.16), transparent 70%),
+      radial-gradient(ellipse 30% 14% at 50% 56%, rgba(var(--lamp), 0.10), transparent 70%);
+    mix-blend-mode: screen;
+  }
+  .desk-mask {
+    -webkit-mask-image: url(assets/desk.png);
+    mask-image: url(assets/desk.png);
+    -webkit-mask-size: 100% 100%;
+    mask-size: 100% 100%;
+  }
+  .desk-shade {
+    background:
+      linear-gradient(to right, rgba(0, 0, 0, 0.45), transparent 22%, transparent 78%, rgba(0, 0, 0, 0.45)),
+      linear-gradient(to bottom, transparent 58%, rgba(0, 0, 0, 0.35) 82%, rgba(0, 0, 0, 0.6));
+    mix-blend-mode: multiply;
+  }
+  .desk-glow {
+    background:
+      radial-gradient(ellipse 34% 30% at 50% 68%, rgba(var(--lamp), 0.75), rgba(var(--lamp), 0.25) 55%, transparent 75%),
+      radial-gradient(ellipse 20% 26% at 14% 66%, rgba(var(--tank), 0.6), transparent 70%),
+      radial-gradient(ellipse 9% 12% at 91% 58%, rgba(var(--lamp), 0.35), transparent 70%);
+    mix-blend-mode: soft-light;
+  }
+
+  .logo {
+    transform: translateY(calc(max(0px, calc(var(--stage-w) * 0.625 - 100vh)) - 7.5%)) scale(0.85);
+    transform-origin: 50% 21.6%;
+    animation: logo-breathe 6s ease-in-out infinite;
+  }
+  @keyframes logo-breathe {
+    0%, 100% { filter: drop-shadow(0 0 26px rgba(var(--lure), 0.35)) drop-shadow(0 0 64px rgba(var(--lure), 0.16)); }
+    50% { filter: drop-shadow(0 0 38px rgba(var(--lure), 0.55)) drop-shadow(0 0 112px rgba(var(--lure), 0.32)); }
+  }
+
+  .case-folder {
+    position: absolute;
+    left: 38.333%;
+    top: calc(59.222% + var(--desk-drop));
+    width: 23.403%;
+    padding: 0;
+    border: 0;
+    background: none;
+    cursor: pointer;
+    border-radius: 6px;
+  }
+  .case-folder img {
+    display: block;
+    width: 100%;
+    max-width: 100%;
+    animation: breathe 3s ease-in-out infinite;
+    transition: transform 0.25s ease;
+  }
+  .case-folder:hover img,
+  .case-folder:focus-visible img {
+    animation-play-state: paused;
+    filter: drop-shadow(0 0 18px rgba(var(--lure), 1)) drop-shadow(0 0 32px rgba(var(--lure), 0.5));
+    transform: translateY(-2%);
+  }
+  .case-folder:focus-visible { outline: 2px solid rgba(var(--lure), 0.9); outline-offset: 6px; }
+  .case-folder:active img { transform: scale(0.98); }
+  @keyframes breathe {
+    0%, 100% { filter: drop-shadow(0 0 8px rgba(var(--lure), 0.6)) drop-shadow(0 0 16px rgba(var(--lure), 0.2)); }
+    50% { filter: drop-shadow(0 0 14px rgba(var(--lure), 0.9)) drop-shadow(0 0 28px rgba(var(--lure), 0.4)); }
+  }
+
+  .vignette {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background: radial-gradient(ellipse 75% 70% at 50% 58%, transparent 50%, rgba(4, 9, 14, 0.55) 100%);
+  }
+
+  /* Tooltip: shows on hover and keyboard focus, stays while the pointer is over it, Escape hides it */
+  .tip {
+    position: fixed;
+    z-index: 30;
+    max-width: min(22rem, calc(100vw - 32px));
+    padding: 0.4rem 0.85rem 0.45rem;
+    border: 2px solid var(--ink-line);
+    border-radius: var(--wobble-sm);
+    background: var(--sea-panel);
+    color: var(--sea-text);
+    font-family: var(--font-ui);
+    font-size: 1.15rem;
+    line-height: 1.35;
+    box-shadow: 0 8px 22px rgba(0, 0, 0, 0.45);
+    opacity: 0;
+    transform: translateY(4px);
+    transition: opacity 0.18s ease, transform 0.18s ease;
+    pointer-events: none;
+  }
+  .tip.is-visible { opacity: 1; transform: none; pointer-events: auto; }
+  .tip::after {
+    content: "";
+    position: absolute;
+    left: var(--arrow-x, 50%);
+    bottom: -7px;
+    width: 10px;
+    height: 10px;
+    background: var(--sea-panel);
+    border-right: 2px solid var(--ink-line);
+    border-bottom: 2px solid var(--ink-line);
+    transform: translateX(-50%) rotate(45deg);
+  }
+  .tip.below::after { bottom: auto; top: -7px; transform: translateX(-50%) rotate(225deg); }
+
+  /* Settings gear: the hand-drawn gear turns to lower the panel and turns back to raise it */
+  .settings-btn {
+    position: absolute;
+    z-index: 26;
+    top: calc(14px + env(safe-area-inset-top, 0px));
+    right: calc(14px + env(safe-area-inset-right, 0px));
+    width: 56px;
+    height: 56px;
+    padding: 4px;
+    border: 0;
+    border-radius: 50%;
+    background: none;
+    cursor: pointer;
+  }
+  .settings-btn img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    filter: brightness(1.3) drop-shadow(0 4px 8px rgba(0, 0, 0, 0.5));
+    transition: transform 0.7s var(--ease-gear), filter 0.2s ease;
+  }
+  .settings-btn:hover img { transform: rotate(30deg); filter: brightness(1.55) drop-shadow(0 4px 8px rgba(0, 0, 0, 0.5)); }
+  .settings-btn[aria-expanded="true"] img { transform: rotate(180deg); filter: brightness(1.55) drop-shadow(0 4px 8px rgba(0, 0, 0, 0.5)); }
+  .settings-btn:focus-visible { outline: 2px solid var(--lure-hex); outline-offset: 2px; }
+
+  .panel {
+    position: absolute;
+    z-index: 25;
+    top: calc(64px + env(safe-area-inset-top, 0px));
+    right: calc(18px + env(safe-area-inset-right, 0px));
+    width: min(22rem, calc(100vw - 36px));
+    max-height: calc(100% - 84px);
+    overflow-y: auto;
+    padding: 0.9rem 1.2rem 1rem;
+    border: 2.5px solid var(--ink-line);
+    border-radius: var(--wobble);
+    background: var(--sea-panel);
+    color: var(--sea-text);
+    font-family: var(--font-ui);
+    box-shadow: 0 14px 40px rgba(0, 0, 0, 0.5);
+    visibility: hidden;
+    clip-path: inset(0 -60px 100% -60px);
+    transform: translateY(-10px);
+    transition: clip-path 0.4s var(--ease-gear), transform 0.4s var(--ease-gear), visibility 0s linear 0.4s;
+  }
+  .panel.is-open {
+    visibility: visible;
+    clip-path: inset(0 -60px -80px -60px);
+    transform: none;
+    transition: clip-path 0.55s var(--ease-gear) 0.12s, transform 0.55s var(--ease-gear) 0.12s, visibility 0s linear 0s;
+  }
+  .panel h2 {
+    margin: 0 0 0.15rem;
+    font-family: var(--font-ui);
+    font-weight: 400;
+    font-size: 1.7rem;
+    line-height: 1.1;
+    color: var(--sea-text);
+  }
+  .settings-list { list-style: none; margin: 0; padding: 0; display: grid; }
+  .setting {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    align-items: center;
+    gap: 1rem;
+    padding-block: 0.7rem 0.8rem;
+    background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='48' height='6'%3E%3Cpath d='M0 3 Q 12 0 24 3 T 48 3' fill='none' stroke='%23A9C7CB' stroke-opacity='0.35' stroke-width='1.5'/%3E%3C/svg%3E") repeat-x left bottom / 48px 6px;
+  }
+  .setting:last-child { background: none; }
+  .setting-text { min-width: 0; }
+  .setting label { display: block; font-size: 1.3rem; line-height: 1.15; cursor: pointer; }
+  .setting p { margin: 0.15rem 0 0; font-size: 1.02rem; line-height: 1.3; color: var(--sea-muted); }
+  html[data-font="clear"] .setting label { font-size: 1.05rem; font-weight: 700; }
+  html[data-font="clear"] .setting p { font-size: 0.9rem; }
+  html[data-font="clear"] .panel h2 { font-size: 1.3rem; font-weight: 700; }
+  html[data-font="clear"] .tip { font-size: 1rem; }
+
+  .switch {
+    appearance: none;
+    -webkit-appearance: none;
+    position: relative;
+    flex: none;
+    width: 3rem;
+    height: 1.65rem;
+    margin: 0;
+    border: 2px solid var(--ink-line);
+    border-radius: 14px 16px 15px 13px / 13px 15px 16px 14px;
+    background: var(--track-off);
+    cursor: pointer;
+    transition: background 0.25s ease;
+  }
+  .switch::before {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 0.18rem;
+    width: 1.1rem;
+    height: 1.1rem;
+    border-radius: 52% 48% 50% 46%;
+    background: var(--sea-muted);
+    transform: translateY(-50%);
+    transition: transform 0.25s var(--ease-gear), background 0.25s ease;
+  }
+  .switch:checked { background: var(--sea-accent); }
+  .switch:checked::before { transform: translate(1.3rem, -50%); background: var(--sea-text); }
+  .switch:focus-visible { outline: 2px solid var(--lure-hex); outline-offset: 3px; }
+
+  .panel-actions { display: flex; justify-content: flex-end; padding-top: 0.5rem; }
+  .panel-done {
+    padding: 0.25rem 1.4rem 0.35rem;
+    border: 2px solid var(--ink-line);
+    border-radius: var(--wobble-sm);
+    background: var(--sea-raised);
+    color: var(--sea-text);
+    font-family: var(--font-ui);
+    font-size: 1.3rem;
+    cursor: pointer;
+    box-shadow: 0 3px 0 var(--ink-line);
+    transition: background 0.2s ease, transform 0.1s ease, box-shadow 0.1s ease;
+  }
+  .panel-done:hover { background: #35708A; }
+  .panel-done:active { transform: translateY(2px); box-shadow: 0 1px 0 var(--ink-line); }
+  .panel-done:focus-visible { outline: 2px solid var(--lure-hex); outline-offset: 3px; }
+
+  /* ---------- Case file view: folder rises, card slides out between tab and front, folder drops away ---------- */
+  :root {
+    --card-w: min(78vw, 120vh);
+    --card-h: calc(var(--card-w) / 1.6516);
+    --card-top: 5vh;
+    --fold-w: calc(var(--card-w) * 1.01);
+    --fold-h: calc(var(--fold-w) * 0.647);
+    --fold-top: calc(100vh - var(--fold-h) * 0.25);
+    --card-start: calc(var(--fold-top) + var(--fold-h) * 0.08 - var(--card-top));
+    --note-scale: 1;
+  }
+  html[data-text="large"] { --note-scale: 1.15; }
+
+  .case-folder { transition: opacity 0.45s ease; }
+  .room, .stage, .vignette { transition: filter 0.7s ease; }
+  body.case-open .room,
+  body.case-open .stage,
+  body.case-open .vignette { filter: blur(6px) brightness(0.45); }
+  body.case-open .case-folder { opacity: 0; pointer-events: none; }
+  html[data-effects="reduce"] body.case-open .room,
+  html[data-effects="reduce"] body.case-open .stage,
+  html[data-effects="reduce"] body.case-open .vignette { filter: brightness(0.35); }
+
+  .case-view {
+    position: absolute;
+    inset: 0;
+    z-index: 15;
+    overflow: hidden;
+    visibility: hidden;
+    pointer-events: none;
+    transition: opacity 0.4s ease;
+  }
+  .case-view.is-active { visibility: visible; pointer-events: auto; }
+  .case-view.is-leaving { opacity: 0; }
+
+  .fold {
+    position: absolute;
+    left: 50%;
+    top: var(--fold-top);
+    width: var(--fold-w);
+    aspect-ratio: 802 / 519;
+    max-width: none;
+    transform: translate(-50%, calc(var(--fold-h) * 0.35));
+    opacity: 0;
+    pointer-events: none;
+    user-select: none;
+    transition: transform 0.65s var(--ease-gear), opacity 0.5s ease;
+  }
+  .fold-tab { z-index: 1; }
+  .fold-front { z-index: 3; filter: drop-shadow(0 -6px 18px rgba(0, 0, 0, 0.35)); }
+  .is-entered .fold { transform: translate(-50%, 0); opacity: 1; }
+  .is-folder-away .fold {
+    transform: translate(-50%, calc(100vh - var(--fold-top) + 40px));
+    transition: transform 0.7s cubic-bezier(0.55, 0, 1, 0.45);
+  }
+
+  .card {
+    position: absolute;
+    z-index: 2;
+    left: 50%;
+    top: var(--card-top);
+    width: var(--card-w);
+    aspect-ratio: 1166 / 706;
+    margin: 0;
+    transform: translate(-50%, var(--card-start));
+    opacity: 0;
+    transition: transform 1s var(--ease-gear);
+  }
+  .card > img {
+    display: block;
+    width: 100%;
+    max-width: 100%;
+    height: 100%;
+    filter: drop-shadow(0 10px 24px rgba(0, 0, 0, 0.45));
+  }
+  .is-card-ready .card { opacity: 1; }
+  .is-card-up .card { transform: translate(-50%, 0); }
+  .card-notes {
+    position: absolute;
+    left: 6.4%;
+    top: 26%;
+    width: 53%;
+    height: 51%;
+    margin: 0;
+    color: rgba(28, 24, 21, 0.9);
+    font-family: var(--font-ui);
+    font-size: calc(var(--card-w) * 0.0304 * var(--note-scale) * var(--note-fit, 1));
+    line-height: 1.3;
+    overflow: hidden;
+  }
+  html[data-font="clear"] .card-notes { font-size: calc(var(--card-w) * 0.0265 * var(--note-scale) * var(--note-fit, 1)); line-height: 1.36; }
+
+  .research-btn {
+    position: absolute;
+    z-index: 4;
+    left: 50%;
+    top: calc(var(--card-top) + var(--card-h) + 3.5vh);
+    display: inline-flex;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 0.35rem 2.8rem 0.55rem 2.2rem;
+    border: 2.5px solid var(--ink-line);
+    border-radius: var(--wobble);
+    background: var(--sea-panel);
+    color: var(--lure-hex);
+    font-family: var(--font-ui);
+    font-size: 2.7rem;
+    line-height: 1.15;
+    cursor: pointer;
+    box-shadow: 0 5px 0 var(--ink-line), 0 14px 32px rgba(0, 0, 0, 0.45);
+    opacity: 0;
+    transform: translate(-50%, 10px);
+    pointer-events: none;
+    transition: opacity 0.45s ease, transform 0.45s var(--ease-gear), background 0.2s ease, box-shadow 0.12s ease;
+  }
+  .research-btn svg { width: 2.2rem; height: 2.2rem; flex: none; }
+  .is-research .research-btn { opacity: 1; transform: translate(-50%, 0); pointer-events: auto; }
+  .is-research .research-btn:hover { background: var(--sea-raised); text-shadow: 0 0 12px rgba(var(--lure), 0.55); }
+  .is-research .research-btn:active { transform: translate(-50%, 3px); box-shadow: 0 1px 0 var(--ink-line), 0 10px 24px rgba(0, 0, 0, 0.4); }
+  .research-btn:focus-visible { outline: 2px solid var(--lure-hex); outline-offset: 4px; }
+  html[data-font="clear"] .research-btn { font-size: 2rem; font-weight: 700; }
+
+  .back-btn {
+    position: absolute;
+    z-index: 5;
+    top: calc(16px + env(safe-area-inset-top, 0px));
+    left: calc(16px + env(safe-area-inset-left, 0px));
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.2rem 1rem 0.3rem 0.75rem;
+    border: 2px solid var(--ink-line);
+    border-radius: var(--wobble-sm);
+    background: var(--sea-panel);
+    color: var(--sea-text);
+    font-family: var(--font-ui);
+    font-size: 1.2rem;
+    cursor: pointer;
+    box-shadow: 0 3px 0 var(--ink-line);
+    opacity: 0;
+    transition: opacity 0.4s ease 0.3s, background 0.2s ease;
+  }
+  .is-entered .back-btn { opacity: 1; }
+  .back-btn:hover { background: var(--sea-raised); }
+  .back-btn:focus-visible { outline: 2px solid var(--lure-hex); outline-offset: 3px; }
+  .back-btn svg { width: 1.1rem; height: 1.1rem; }
+
+  html[data-effects="reduce"] .research-btn,
+  html[data-effects="reduce"] .back-btn { background-color: #06131B; border-color: var(--lure-hex); }
+  html[data-effects="reduce"] .research-btn { color: #FFFFFF; }
+
+  /* ---------- Shared hand-drawn controls ---------- */
+  .hb {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 0.25rem 1.3rem 0.35rem;
+    border: 2.5px solid var(--ink-line);
+    border-radius: var(--wobble-sm);
+    background: var(--sea-panel);
+    color: var(--sea-text);
+    font-family: var(--font-ui);
+    font-size: 1.3rem;
+    line-height: 1.2;
+    cursor: pointer;
+    box-shadow: 0 3px 0 var(--ink-line);
+    transition: background 0.2s ease, transform 0.1s ease, box-shadow 0.1s ease, opacity 0.2s ease;
+  }
+  .hb:hover { background: var(--sea-raised); }
+  .hb:active { transform: translateY(2px); box-shadow: 0 1px 0 var(--ink-line); }
+  .hb:focus-visible { outline: 2px solid var(--lure-hex); outline-offset: 3px; }
+  .hb svg { width: 1.15em; height: 1.15em; flex: none; }
+  .hb-primary {
+    padding: 0.35rem 2rem 0.5rem;
+    border-radius: var(--wobble);
+    color: var(--lure-hex);
+    font-size: 1.8rem;
+    box-shadow: 0 4px 0 var(--ink-line), 0 12px 28px rgba(0, 0, 0, 0.45);
+  }
+  .hb-primary:hover { text-shadow: 0 0 12px rgba(var(--lure), 0.55); }
+  .hb[aria-disabled="true"] { opacity: 0.55; cursor: not-allowed; }
+  .hb[aria-disabled="true"]:hover { background: var(--sea-panel); text-shadow: none; }
+  .hb[aria-disabled="true"]:active { transform: none; box-shadow: 0 4px 0 var(--ink-line); }
+  html[data-font="clear"] .hb { font-size: 1.05rem; font-weight: 700; }
+  html[data-font="clear"] .hb-primary { font-size: 1.35rem; }
+
+  .hand-panel {
+    padding: 1rem 1.25rem 1.1rem;
+    border: 2.5px solid var(--ink-line);
+    border-radius: var(--wobble);
+    background: var(--sea-panel);
+    color: var(--sea-text);
+    font-family: var(--font-ui);
+    box-shadow: 0 14px 40px rgba(0, 0, 0, 0.5);
+  }
+  .hand-panel h3 { margin: 0 0 0.4rem; font-weight: 400; font-size: 1.7rem; line-height: 1.1; }
+  .hand-panel p { margin: 0; font-size: 1.15rem; line-height: 1.4; color: var(--sea-muted); }
+  html[data-font="clear"] .hand-panel h3 { font-size: 1.3rem; font-weight: 700; }
+  html[data-font="clear"] .hand-panel p { font-size: 0.95rem; }
+  .wave-rule {
+    height: 6px;
+    margin-block: 0.7rem;
+    background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='48' height='6'%3E%3Cpath d='M0 3 Q 12 0 24 3 T 48 3' fill='none' stroke='%23A9C7CB' stroke-opacity='0.35' stroke-width='1.5'/%3E%3C/svg%3E") repeat-x left center / 48px 6px;
+  }
+
+  /* ---------- The dive: everything below the surface ---------- */
+  .dive {
+    position: absolute;
+    inset: 0;
+    z-index: 18;
+    overflow-x: hidden;
+    overflow-y: auto;
+    background: #02060A;
+    color: var(--sea-text);
+    font-family: var(--font-ui);
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.8s ease, visibility 0s linear 0.8s, background-color 2.2s ease;
+  }
+  .dive.is-active { opacity: 1; visibility: visible; transition: opacity 0.8s ease, visibility 0s linear 0s, background-color 2.2s ease; }
+  .dive.is-lit { background-color: #0B2532; }
+  html[data-effects="reduce"] .dive { background-color: #0A1820; }
+  html[data-effects="reduce"] .dive.is-lit { background-color: #0E2733; }
+
+  .surface-btn {
+    position: absolute;
+    z-index: 5;
+    top: calc(16px + env(safe-area-inset-top, 0px));
+    left: calc(16px + env(safe-area-inset-left, 0px));
+    font-size: 1.2rem;
+  }
+  .depth-label {
+    position: absolute;
+    top: calc(24px + env(safe-area-inset-top, 0px));
+    left: 50%;
+    transform: translateX(-50%);
+    margin: 0;
+    font-size: 1.05rem;
+    letter-spacing: 0.04em;
+    color: var(--sea-muted);
+    white-space: nowrap;
+  }
+  .screen {
+    min-height: 100%;
+    box-sizing: border-box;
+    padding: calc(58px + env(safe-area-inset-top, 0px)) max(16px, env(safe-area-inset-right, 0px)) 48px max(16px, env(safe-area-inset-left, 0px));
+    opacity: 0;
+    transition: opacity 0.7s ease;
+  }
+  .screen.is-in { opacity: 1; }
+  .screen:focus { outline: none; }
+  .screen-title { margin: 0; font-weight: 400; font-size: 2.6rem; line-height: 1.1; text-align: center; }
+  .screen-sub { margin: 0.35rem auto 0; max-width: 56rem; font-size: 1.3rem; line-height: 1.4; text-align: center; color: var(--sea-muted); }
+  html[data-font="clear"] .screen-title { font-size: 2rem; font-weight: 700; }
+  html[data-font="clear"] .screen-sub { font-size: 1.05rem; }
+
+  /* Encounter: total darkness and one light */
+  .encounter { position: relative; display: grid; place-items: center; }
+  .narration { position: absolute; left: 0; right: 0; bottom: 14%; display: grid; gap: 0.4rem; text-align: center; pointer-events: none; }
+  .narration p { margin: 0; font-size: 1.6rem; color: var(--sea-muted); opacity: 0; transition: opacity 1.4s ease; }
+  .narration p.is-in { opacity: 1; }
+  html[data-font="clear"] .narration p { font-size: 1.2rem; }
+  .stalk { position: absolute; left: 0; top: 0; width: 100%; height: 100%; pointer-events: none; opacity: 0; transition: opacity 2s ease; }
+  .stalk.is-in { opacity: 1; }
+  .lure-orb {
+    position: relative;
+    width: 4.2rem;
+    height: 4.2rem;
+    padding: 0;
+    border: 0;
+    border-radius: 50%;
+    background: radial-gradient(circle at 42% 38%, #FFFFFF 0%, #D9FFF8 22%, var(--lure-hex) 55%, rgba(var(--lure), 0) 72%);
+    box-shadow: 0 0 40px 14px rgba(var(--lure), 0.45), 0 0 120px 50px rgba(var(--lure), 0.18);
+    cursor: pointer;
+    opacity: 0;
+    transform: scale(0.6);
+    transition: opacity 1.6s ease, transform 1.6s var(--ease-gear);
+  }
+  .lure-orb.is-in { opacity: 1; transform: scale(1); animation: bob 4.5s ease-in-out infinite 1.6s; }
+  .lure-orb.is-taken { opacity: 0; transform: scale(3); animation: none; transition: opacity 0.6s ease, transform 0.6s ease; }
+  .lure-orb:focus-visible { outline: 2px solid #FFFFFF; outline-offset: 10px; }
+  @keyframes bob { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-12px); } }
+
+  /* The fake website: deliberately "polished" and corporate, unlike the hand-drawn game around it */
+  .offer-wrap { position: relative; display: grid; place-items: center; }
+  .offer-wrap::before {
+    content: "";
+    position: absolute;
+    inset: -18% -30%;
+    background: radial-gradient(closest-side, rgba(var(--lure), 0.28), rgba(var(--lure), 0.08) 55%, transparent 80%);
+    pointer-events: none;
+    opacity: var(--halo, 1);
+    transition: opacity 0.6s ease;
+  }
+  .offer {
+    position: relative;
+    width: min(28rem, 100%);
+    box-sizing: border-box;
+    padding: 1.4rem 1.6rem 1.1rem;
+    border-radius: 18px;
+    background: #F6FAFB;
+    color: #0D1B24;
+    font-family: "DM Sans", system-ui, sans-serif;
+    text-align: center;
+    color-scheme: light;
+    box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.6), 0 20px 60px rgba(0, 0, 0, 0.55), 0 0 60px rgba(var(--lure), 0.35);
+  }
+  .offer-top { display: flex; align-items: center; justify-content: space-between; gap: 0.75rem; margin-bottom: 1rem; }
+  .brand { display: inline-flex; align-items: center; gap: 0.4rem; font-weight: 800; font-size: 1.15rem; letter-spacing: -0.01em; }
+  .brand-dot { width: 0.7rem; height: 0.7rem; border-radius: 50%; background: radial-gradient(circle, #FFFFFF, var(--lure-hex) 60%); box-shadow: 0 0 10px rgba(var(--lure), 0.9); }
+  .timer { position: relative; padding: 0.2rem 0.6rem; border-radius: 999px; background: #FFE4E1; color: #B4231A; font-weight: 700; font-size: 0.8rem; font-variant-numeric: tabular-nums; }
+  .offer-head { margin: 0; font-weight: 800; font-size: 2rem; line-height: 1.08; letter-spacing: -0.02em; }
+  .offer-head .free strong { font-weight: 900; }
+  .offer-head .free { font-weight: 600; display: block; background: linear-gradient(90deg, #0FA3B1, #19C2A8); -webkit-background-clip: text; background-clip: text; color: transparent; }
+  .offer-sub { margin: 0.6rem 0 1.1rem; font-size: 0.95rem; line-height: 1.45; color: #4C5E68; }
+  .price-line { display: none; margin: -0.3rem 0 0.8rem; font-size: 1rem; line-height: 1.4; color: #0D1B24; }
+  .offer-cta {
+    position: relative;
+    width: 100%;
+    padding: 0.95rem 1rem;
+    border: 0;
+    border-radius: 999px;
+    background: linear-gradient(180deg, #4FF0DA, #12B8A6);
+    color: #04252A;
+    font-family: inherit;
+    font-weight: 800;
+    font-size: 1.15rem;
+    cursor: pointer;
+    box-shadow: 0 0 0 4px rgba(var(--lure), 0.25), 0 0 34px rgba(var(--lure), 0.75), 0 8px 18px rgba(0, 0, 0, 0.2);
+    transition: box-shadow 0.4s ease, background 0.4s ease, color 0.4s ease;
+  }
+  .offer-cta:focus-visible, .offer-decline:focus-visible { outline: 3px solid #0D1B24; outline-offset: 3px; }
+  .addon { position: relative; display: inline-flex; align-items: center; gap: 0.4rem; margin-top: 0.75rem; font-size: 0.72rem; color: #8A979E; cursor: pointer; }
+  .addon input { width: 0.85rem; height: 0.85rem; margin: 0; accent-color: #12B8A6; }
+  .offer-alt { position: relative; margin-top: 0.35rem; }
+  .offer-decline {
+    padding: 0.2rem 0.3rem;
+    border: 0;
+    border-radius: 6px;
+    background: none;
+    color: #98A4AA;
+    font-family: inherit;
+    font-size: 0.72rem;
+    text-decoration: underline;
+    text-decoration-color: rgba(152, 164, 170, 0.4);
+    cursor: pointer;
+    transition: all 0.4s ease;
+  }
+  .fine { position: relative; margin: 0.9rem 0 0; font-size: 0.6rem; line-height: 1.4; color: #A6B1B6; text-align: left; transition: font-size 0.35s ease, color 0.35s ease; }
+
+  /* Trick markers, shown during the reveal */
+  .mark {
+    display: none;
+    position: absolute;
+    z-index: 2;
+    width: 1.9rem;
+    height: 1.9rem;
+    place-items: center;
+    border: 2.5px solid var(--ink-line);
+    border-radius: 52% 48% 50% 46%;
+    background: #FFD86B;
+    color: #24323F;
+    font-family: var(--font-ui);
+    font-size: 1.15rem;
+    line-height: 1;
+    box-shadow: 0 3px 0 var(--ink-line);
+  }
+  .offer.inspect .mark { display: grid; }
+  .mark-1 { right: -0.8rem; top: -0.9rem; }
+  .mark-2 { left: -2.3rem; top: 0; }
+  .mark-3 { left: -2.3rem; top: 50%; transform: translateY(-50%); }
+  .mark-4 { right: -2.3rem; top: 50%; transform: translateY(-50%); }
+  .mark-5 { right: -1rem; top: -1.1rem; }
+  .mark-6 { right: -2.3rem; bottom: 0; }
+  .offer [data-trick] { transition: outline-color 0.2s ease, box-shadow 0.2s ease; outline: 3px dashed transparent; outline-offset: 4px; }
+  .offer[data-hl="1"] [data-trick~="1"], .offer[data-hl="2"] [data-trick~="2"], .offer[data-hl="3"] [data-trick~="3"],
+  .offer[data-hl="4"] [data-trick~="4"], .offer[data-hl="5"] [data-trick~="5"], .offer[data-hl="6"] [data-trick~="6"] { outline-color: #E0A92E; }
+
+  /* Fixes applied in the Redesign Lab */
+  .offer.fix-balance .offer-cta { box-shadow: 0 8px 18px rgba(0, 0, 0, 0.18); }
+  .offer.fix-balance .offer-alt { margin-top: 0.6rem; }
+  .offer.fix-balance .offer-decline {
+    width: 100%;
+    padding: 0.85rem 1rem;
+    border: 2px solid #0D1B24;
+    border-radius: 999px;
+    color: #0D1B24;
+    font-size: 1.05rem;
+    font-weight: 700;
+    text-decoration: none;
+  }
+  .offer.fix-price .price-line { display: block; }
+  .offer.fix-addon .addon { color: #34464F; font-size: 0.85rem; }
+  .offer.fix-timer .timer { visibility: hidden; }
+  .offer[data-terms="1"] .fine { font-size: 0.72rem; color: #6E7E86; }
+  .offer[data-terms="2"] .fine { font-size: 0.9rem; color: #22343D; }
+
+  .reveal-grid, .lab-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: clamp(1.5rem, 4vw, 3.5rem);
+    align-items: center;
+    max-width: 68rem;
+    margin: 1.6rem auto 0;
+  }
+  .reveal-grid > *, .lab-grid > * { min-width: 0; }
+  .offer-stage { display: grid; place-items: center; padding: 1.5rem 2.5rem; }
+  .receipt { display: grid; gap: 0.25rem; margin-top: 0.7rem; font-size: 1.2rem; font-variant-numeric: tabular-nums; }
+  .receipt div { display: flex; justify-content: space-between; gap: 1rem; }
+  .receipt .total { margin-top: 0.3rem; padding-top: 0.35rem; border-top: 2px dashed rgba(169, 199, 203, 0.4); color: #FFD86B; font-size: 1.35rem; }
+  .tricks { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.15rem; }
+  .tricks li { display: grid; grid-template-columns: auto 1fr; gap: 0.75rem; align-items: start; padding: 0.45rem 0.5rem; border-radius: var(--wobble-sm); cursor: default; }
+  .tricks li:hover, .tricks li:focus-visible { background: rgba(255, 216, 107, 0.08); outline: none; }
+  .tricks li:focus-visible { box-shadow: inset 0 0 0 2px var(--lure-hex); }
+  .tricks .num { display: grid; place-items: center; width: 1.8rem; height: 1.8rem; border: 2.5px solid var(--ink-line); border-radius: 52% 48% 50% 46%; background: #FFD86B; color: #24323F; font-size: 1.1rem; }
+  .tricks b { display: block; font-weight: 400; font-size: 1.3rem; line-height: 1.15; }
+  .tricks span.why { display: block; font-size: 1.05rem; line-height: 1.35; color: var(--sea-muted); }
+  .tricks .spotted { color: var(--sea-accent); }
+  html[data-font="clear"] .tricks b { font-size: 1.05rem; font-weight: 700; }
+  html[data-font="clear"] .tricks span.why { font-size: 0.9rem; }
+  .screen-actions { display: flex; justify-content: center; margin-top: 2rem; }
+
+  /* Redesign Lab controls */
+  .lab-preview { --clarity: 0; padding: 2rem 2.5rem; }
+  .lab-preview .offer-wrap { --halo: 0; }
+  .lab-preview .offer {
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5),
+      0 0 calc(var(--clarity) * 60px) calc(var(--clarity) * 12px) rgba(var(--lure), calc(var(--clarity) * 0.85));
+    transition: box-shadow 0.7s ease;
+  }
+  html[data-effects="reduce"] .lab-preview .offer { box-shadow: 0 0 0 calc(var(--clarity) * 4px) var(--lure-hex); }
+  .lab-list { list-style: none; margin: 0; padding: 0; display: grid; }
+  .lab-row { display: grid; grid-template-columns: 1fr auto; gap: 1rem; align-items: center; padding-block: 0.6rem 0.7rem; background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='48' height='6'%3E%3Cpath d='M0 3 Q 12 0 24 3 T 48 3' fill='none' stroke='%23A9C7CB' stroke-opacity='0.3' stroke-width='1.5'/%3E%3C/svg%3E") repeat-x left bottom / 48px 6px; }
+  .lab-row.stack { grid-template-columns: 1fr; gap: 0.45rem; }
+  .lab-row label, .lab-row legend { display: block; padding: 0; font-size: 1.25rem; line-height: 1.15; cursor: pointer; }
+  .lab-row .hint-text { display: block; margin-top: 0.1rem; font-size: 1rem; line-height: 1.3; color: var(--sea-muted); }
+  .lab-row .done-tick { color: var(--sea-accent); margin-left: 0.3rem; visibility: hidden; }
+  .lab-row.is-fixed .done-tick { visibility: visible; }
+  html[data-font="clear"] .lab-row label, html[data-font="clear"] .lab-row legend { font-size: 1rem; font-weight: 700; }
+  html[data-font="clear"] .lab-row .hint-text { font-size: 0.88rem; }
+  fieldset.lab-row { margin: 0; border: 0; min-width: 0; }
+  .choices { display: flex; flex-wrap: wrap; gap: 0.45rem; }
+  .choice { position: relative; }
+  .choice input { position: absolute; opacity: 0; width: 1px; height: 1px; }
+  .choice span {
+    display: inline-block;
+    padding: 0.2rem 0.75rem 0.3rem;
+    border: 2px solid var(--ink-line);
+    border-radius: var(--wobble-sm);
+    background: var(--track-off);
+    color: var(--sea-muted);
+    font-size: 1.05rem;
+    cursor: pointer;
+    transition: background 0.2s ease, color 0.2s ease;
+  }
+  .choice input:checked + span { background: var(--sea-accent); color: #0B2027; }
+  .choice input:focus-visible + span { outline: 2px solid var(--lure-hex); outline-offset: 2px; }
+  html[data-font="clear"] .choice span { font-size: 0.9rem; }
+  .terms-range { width: 100%; margin: 0.2rem 0 0; appearance: none; -webkit-appearance: none; height: 1.6rem; background: none; cursor: pointer; }
+  .terms-range::-webkit-slider-runnable-track { height: 0.55rem; border: 2px solid var(--ink-line); border-radius: 8px 10px 9px 7px; background: var(--track-off); }
+  .terms-range::-moz-range-track { height: 0.55rem; border: 2px solid var(--ink-line); border-radius: 8px 10px 9px 7px; background: var(--track-off); }
+  .terms-range::-webkit-slider-thumb { -webkit-appearance: none; width: 1.3rem; height: 1.3rem; margin-top: -0.5rem; border: 2px solid var(--ink-line); border-radius: 52% 48% 50% 46%; background: var(--sea-text); }
+  .terms-range::-moz-range-thumb { width: 1.3rem; height: 1.3rem; border: 2px solid var(--ink-line); border-radius: 52% 48% 50% 46%; background: var(--sea-text); }
+  .terms-range:focus-visible { outline: 2px solid var(--lure-hex); outline-offset: 4px; border-radius: 6px; }
+  .range-labels { display: flex; justify-content: space-between; font-size: 0.95rem; color: var(--sea-muted); }
+  .gauge-row { margin-top: 0.9rem; }
+  .gauge-head { display: flex; justify-content: space-between; align-items: baseline; font-size: 1.2rem; }
+  .gauge-head span { color: var(--sea-muted); font-size: 1.05rem; font-variant-numeric: tabular-nums; }
+  .gauge { height: 0.9rem; margin-top: 0.3rem; border: 2.5px solid var(--ink-line); border-radius: 10px 12px 11px 9px / 9px 11px 12px 10px; background: var(--track-off); overflow: hidden; }
+  .gauge-fill { height: 100%; width: calc(var(--clarity, 0) * 100%); background: var(--sea-accent); transition: width 0.5s var(--ease-gear); }
+  .lab-message { min-height: 1.4em; margin: 0.6rem 0 0; font-size: 1.05rem; color: #FFD86B; text-align: center; }
+  .lab-file { margin-top: 0.4rem; width: 100%; }
+
+  /* Case resolved */
+  .resolved-grid { display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); gap: clamp(1.5rem, 4vw, 3rem); align-items: center; max-width: 76rem; margin: 1.6rem auto 0; }
+  .resolved-grid > * { min-width: 0; }
+  .card-static { --card-w: min(44vw, 92vh); position: relative; width: var(--card-w); max-width: 100%; aspect-ratio: 1166 / 706; margin: 0 auto; }
+  .card-static > img { display: block; width: 100%; height: 100%; filter: drop-shadow(0 10px 24px rgba(0, 0, 0, 0.45)); }
+  .stamp {
+    position: absolute;
+    left: 39%;
+    top: 74%;
+    padding: 0.05em 0.35em 0.12em;
+    border: 0.12em solid #15707A;
+    border-radius: 6px 9px 5px 10px;
+    color: #15707A;
+    font-family: "Patrick Hand", var(--font-hand);
+    font-size: calc(var(--card-w) * 0.052);
+    line-height: 1;
+    letter-spacing: 0.06em;
+    transform: rotate(-8deg);
+    background: rgba(246, 236, 214, 0.85);
+    pointer-events: none;
+    display: none;
+  }
+  .card-static .stamp, html[data-case1="resolved"] .card .stamp { display: block; }
+  .chips { display: flex; flex-wrap: wrap; gap: 0.4rem; margin-top: 0.7rem; }
+  .chips span { padding: 0.15rem 0.7rem 0.25rem; border: 2px solid var(--ink-line); border-radius: var(--wobble-sm); background: var(--track-off); font-size: 1.05rem; color: var(--sea-text); }
+  html[data-font="clear"] .chips span { font-size: 0.88rem; }
+  .lesson { margin-top: 0.4rem; font-size: 1.35rem !important; color: var(--sea-text) !important; }
+  html[data-font="clear"] .lesson { font-size: 1.05rem !important; }
+
+  @media (max-width: 860px) {
+    .reveal-grid, .lab-grid, .resolved-grid { grid-template-columns: minmax(0, 1fr); }
+    .card-static { --card-w: min(92vw, 90vh); }
+    .offer-stage { padding: 1.5rem 2.4rem; }
+  }
+
+  /* Settings for the dive */
+  html[data-motion="reduce"] .lure-orb.is-in { animation: none; }
+  html[data-effects="reduce"] .offer-wrap::before { display: none; }
+  html[data-effects="reduce"] .offer { box-shadow: 0 0 0 3px var(--lure-hex); }
+  html[data-effects="reduce"] .offer-cta { box-shadow: none; }
+  html[data-effects="reduce"] .fine { color: #6E7E86; }
+  html[data-effects="reduce"] .offer-decline { color: #5E6C73; }
+  html[data-effects="reduce"] .addon { color: #5E6C73; }
+  html[data-effects="reduce"] .hand-panel,
+  html[data-effects="reduce"] .hb { background-color: #06131B; border-color: var(--lure-hex); }
+  html[data-effects="reduce"] .hand-panel p,
+  html[data-effects="reduce"] .tricks span.why,
+  html[data-effects="reduce"] .lab-row .hint-text,
+  html[data-effects="reduce"] .narration p,
+  html[data-effects="reduce"] .depth-label,
+  html[data-effects="reduce"] .screen-sub { color: #E2F0F0; }
+  html[data-effects="reduce"] .lure-orb { box-shadow: 0 0 0 3px #FFFFFF; }
+
+  /* Fade-to-black between scenes, above everything */
+  .fader { position: absolute; inset: 0; z-index: 50; background: #000; opacity: 0; pointer-events: none; transition: opacity 0.6s ease; }
+  .fader.is-on { opacity: 1; pointer-events: auto; }
+  .no-anim, .no-anim *, .no-anim *::before, .no-anim *::after { transition: none !important; }
+
+  /* Once the folder drops away, the card and Research button settle lower on the screen */
+  :root { --card-settle: max(3.5vh, calc((100vh - var(--card-h) - 13vh) / 2 - var(--card-top))); }
+  .is-settled .card { transform: translate(-50%, var(--card-settle)); transition: transform 0.8s var(--ease-gear); }
+  .research-btn { transform: translate(-50%, calc(var(--card-settle) + 10px)); }
+  .is-research .research-btn { transform: translate(-50%, var(--card-settle)); }
+  .is-research .research-btn:active { transform: translate(-50%, calc(var(--card-settle) + 3px)); }
+  .card .card-under { position: absolute; inset: 0; width: 100%; height: 100%; filter: drop-shadow(0 10px 24px rgba(0, 0, 0, 0.45)); }
+  .card > #card-img { position: relative; transition: opacity 1.6s ease; }
+  .card > #card-img.is-fading { opacity: 0; }
+  .card > #card-img.no-fade { transition: none; }
+
+  /* Lure screen: only the glow in the dark */
+  .lure-only { display: none; }
+  .is-luring .lure-only { display: block; }
+  .is-luring .lure-only.sr-only { display: block; }
+  .is-luring .fx:not(.reveal-layout), .is-luring .fx-group, .is-luring .tricks { visibility: hidden; }
+  .is-luring .offer-wrap::before { inset: -45% -70%; background: radial-gradient(closest-side, rgba(var(--lure), 0.3), rgba(var(--lure), 0.1) 50%, transparent 80%); }
+  .dive.is-lit { background-color: #0C2F4A; }
+  html[data-effects="reduce"] .dive.is-lit { background-color: #10304A; }
+
+  /* Bigger interfaces on bigger screens */
+  .dive { --ui: 1.12; }
+  @media (min-width: 1200px) and (min-height: 740px) { .dive { --ui: 1.2; } }
+  @media (min-width: 1500px) and (min-height: 960px) { .dive { --ui: 1.4; } }
+  .reveal-grid, .lab-grid { align-items: start; margin-top: 1.2rem; }
+  @media (min-width: 2200px) and (min-height: 1200px) { .dive { --ui: 1.8; } }
+  .screen-title, .screen-sub, .reveal-grid, .lab-grid, .screen-actions { zoom: var(--ui); }
+  .offer { width: min(30rem, 100%); }
+
+  /* Reveal: cost strip, then the offer with its tricks on either side */
+  .receipt-bar {
+    zoom: var(--ui);
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: stretch;
+    gap: 0.5rem;
+    max-width: 60rem;
+    margin: 1rem auto 0;
+    font-variant-numeric: tabular-nums;
+  }
+  .receipt-bar .rc {
+    display: grid;
+    gap: 0.05rem;
+    padding: 0.35rem 0.9rem 0.45rem;
+    border: 2.5px solid var(--ink-line);
+    border-radius: var(--wobble-sm);
+    background: var(--sea-panel);
+    box-shadow: 0 3px 0 var(--ink-line);
+    text-align: center;
+  }
+  .receipt-bar .rc span { font-size: 1rem; color: var(--sea-muted); }
+  .receipt-bar .rc b { font-weight: 400; font-size: 1.45rem; color: var(--sea-text); }
+  .receipt-bar .rc.total b { color: #FFD86B; }
+  .receipt-bar .op { align-self: center; font-size: 1.6rem; color: var(--sea-muted); }
+  html[data-font="clear"] .receipt-bar .rc span { font-size: 0.85rem; }
+  html[data-font="clear"] .receipt-bar .rc b { font-size: 1.15rem; font-weight: 700; }
+  .reveal-layout {
+    zoom: var(--ui);
+    display: grid;
+    grid-template-columns: minmax(0, 17.5rem) 35.2rem minmax(0, 17.5rem);
+    justify-content: center;
+    align-items: center;
+    gap: 1.2rem;
+    max-width: 70rem;
+    margin: 1.7rem auto 0;
+  }
+  .reveal-layout .offer-stage { padding: 1.5rem 2.6rem; }
+  .tricks-left, .tricks-right { gap: 0.7rem; align-self: stretch; grid-auto-rows: 1fr; }
+  .reveal-layout .tricks li { position: relative; }
+  /* "Spotted" sits on the card's edge like a tag, so it doesn't make that card taller */
+  .reveal-layout .tricks .spotted {
+    position: absolute;
+    top: -0.75rem;
+    right: 0.6rem;
+    padding: 0.05rem 0.6rem 0.15rem;
+    border: 2px solid var(--ink-line);
+    border-radius: var(--wobble-sm);
+    background: var(--sea-accent);
+    color: #0B2027;
+    font-size: 0.95rem;
+    line-height: 1.2;
+    transform: rotate(3deg);
+    white-space: nowrap;
+  }
+  .reveal-layout .tricks li {
+    border: 2.5px solid var(--ink-line);
+    border-radius: var(--wobble-sm);
+    background: var(--sea-panel);
+    box-shadow: 0 3px 0 var(--ink-line);
+    padding: 0.55rem 0.75rem 0.65rem;
+  }
+  .reveal-layout .tricks li:hover, .reveal-layout .tricks li:focus-visible { background: var(--sea-raised); }
+  .reveal-layout .tricks b { font-size: 1.25rem; }
+  .reveal-layout .tricks span.why { font-size: 1rem; }
+  .mark-1 { left: -0.9rem; right: auto; top: -0.9rem; }
+  .reveal-layout + .screen-actions { margin-top: 0.6rem; }
+  .reveal-layout .offer-stage { padding-block: 0.4rem; }
+  .receipt-bar { margin-top: 0.7rem; }
+  @media (max-width: 1050px) {
+    .reveal-layout { grid-template-columns: minmax(0, 31rem); }
+    .reveal-layout .offer-stage { order: -1; }
+  }
+  html[data-effects="reduce"] .receipt-bar .rc,
+  html[data-effects="reduce"] .reveal-layout .tricks li { background-color: #06131B; border-color: var(--lure-hex); }
+
+  /* The one big "go" button per screen: filled with the lure color and breathing like the folder */
+  .hb-go {
+    padding: 0.4rem 2.2rem 0.55rem;
+    border: 3px solid var(--ink-line);
+    border-radius: var(--wobble);
+    background: var(--lure-hex);
+    color: #062229;
+    font-size: 2rem;
+    box-shadow: 0 5px 0 var(--ink-line), 0 0 0 0 rgba(var(--lure), 0);
+    animation: go-breathe 2.8s ease-in-out infinite;
+  }
+  .hb-go:hover { background: #8AF0E2; }
+  .hb-go:active { transform: translateY(3px); box-shadow: 0 2px 0 var(--ink-line); }
+  .hb-go:focus-visible { outline: 3px solid #FFFFFF; outline-offset: 4px; }
+  .hb-go svg { width: 1.1em; height: 1.1em; }
+  @keyframes go-breathe {
+    0%, 100% { box-shadow: 0 5px 0 var(--ink-line), 0 0 14px 2px rgba(var(--lure), 0.35); }
+    50% { box-shadow: 0 5px 0 var(--ink-line), 0 0 34px 10px rgba(var(--lure), 0.6); }
+  }
+  .hb-go[aria-disabled="true"] { background: var(--sea-panel); color: var(--sea-muted); animation: none; box-shadow: 0 5px 0 var(--ink-line); opacity: 0.7; }
+  .hb-go[aria-disabled="true"]:hover { background: var(--sea-panel); }
+  html[data-font="clear"] .hb-go { font-size: 1.45rem; font-weight: 700; }
+  html[data-motion="reduce"] .hb-go { animation: none; box-shadow: 0 5px 0 var(--ink-line), 0 0 24px 6px rgba(var(--lure), 0.5); }
+  html[data-effects="reduce"] .hb-go { animation: none; background: var(--lure-hex); border-color: #FFFFFF; box-shadow: 0 5px 0 #FFFFFF; }
+  html[data-effects="reduce"] .hb-go[aria-disabled="true"] { background: #06131B; color: #E2F0F0; border-color: var(--lure-hex); }
+
+  .hb-go-sm { padding: 0.35rem 1.8rem 0.5rem; font-size: 1.65rem; }
+  html[data-font="clear"] .hb-go-sm { font-size: 1.25rem; }
+
+  /* A strong but secondary action: cyan outline and text on the dark panel, with a steady glow */
+  .hb-lead {
+    padding: 0.35rem 1.8rem 0.5rem;
+    border: 3px solid var(--lure-hex);
+    border-radius: var(--wobble);
+    color: var(--lure-hex);
+    font-size: 1.65rem;
+    box-shadow: 0 4px 0 var(--ink-line), 0 0 18px 2px rgba(var(--lure), 0.35);
+  }
+  .hb-lead:hover { background: var(--sea-raised); box-shadow: 0 4px 0 var(--ink-line), 0 0 26px 6px rgba(var(--lure), 0.5); text-shadow: 0 0 10px rgba(var(--lure), 0.5); }
+  .hb-lead:active { box-shadow: 0 1px 0 var(--ink-line), 0 0 18px 2px rgba(var(--lure), 0.35); }
+  html[data-font="clear"] .hb-lead { font-size: 1.25rem; font-weight: 700; }
+  html[data-effects="reduce"] .hb-lead { box-shadow: 0 4px 0 var(--lure-hex); }
+
+  /* Reveal: tricks are uncovered one at a time */
+  .reveal-actions { flex-direction: column; align-items: center; gap: 0.6rem; }
+  .reveal-count { margin: 0; font-size: 1.3rem; color: var(--sea-muted); font-variant-numeric: tabular-nums; }
+  html[data-font="clear"] .reveal-count { font-size: 1.05rem; }
+  .reveal-layout .tricks li { opacity: 0; visibility: hidden; transform: translateY(10px); transition: opacity 0.45s ease, transform 0.45s var(--ease-gear), visibility 0s linear 0.45s, background 0.2s ease; }
+  .reveal-layout .tricks li.is-shown { opacity: 1; visibility: visible; transform: none; transition: opacity 0.45s ease, transform 0.45s var(--ease-gear), visibility 0s, background 0.2s ease; }
+  .reveal-layout .tricks li.is-current { background: var(--sea-raised); box-shadow: 0 3px 0 var(--ink-line), 0 0 0 3px rgba(255, 216, 107, 0.55); }
+  .offer.inspect .mark { display: none; }
+  .offer.inspect .mark.is-shown { display: grid; animation: mark-pop 0.35s var(--ease-gear); }
+  @keyframes mark-pop { from { scale: 0.4; opacity: 0; } to { scale: 1; opacity: 1; } }
+  html[data-motion="reduce"] .offer.inspect .mark.is-shown { animation: none; }
+
+  /* Staggered fade-in for the reveal screen */
+  .screen.enter-anim .fx { animation: fx-in 1s var(--ease-gear) both; animation-delay: var(--d, 0s); }
+  @keyframes fx-in { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
+  /* The title settles in from slightly larger and out of focus. Only smooth properties are animated,
+     so the letters never re-wrap or jitter while it plays. */
+  .screen.enter-anim .fx-hero { animation-name: fx-hero; animation-duration: 1.4s; animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1); will-change: transform, opacity, filter; }
+  @keyframes fx-hero {
+    from { opacity: 0; transform: scale(1.12); filter: blur(10px); }
+    55% { opacity: 1; filter: blur(0); }
+    to { opacity: 1; transform: scale(1); filter: blur(0); }
+  }
+  @keyframes fx-fade { from { opacity: 0; } to { opacity: 1; } }
+  .is-holding .fx { opacity: 0; }
+  /* The offer fades in on the dark lure screen instead of already being there */
+  .is-luring .offer-wrap { animation: fx-fade 1.2s ease 1.8s both; }
+  .dive.slow-glow .dive-bg-dark { transition-duration: 1.2s; }
+  html[data-motion="reduce"] .is-luring .offer-wrap { animation-duration: 0.4s; animation-delay: 0.3s; }
+  html[data-motion="reduce"] .screen.enter-anim .fx { animation-name: fx-fade; animation-duration: 0.4s; animation-delay: 0s; }
+
+  /* Lure to reveal: everything goes dark except the offer, which glides to its new spot */
+  .dive-fader { position: fixed; inset: 0; z-index: 6; background: #000; opacity: 0; pointer-events: none; transition: opacity 0.6s ease; }
+  .dive-fader.is-on { opacity: 1; pointer-events: auto; }
+  .offer-wrap.is-carried { position: relative; z-index: 7; }
+  /* The offer's glow fades out together with the fade to black, and stays off for the reveal */
+  .offer-wrap.glow-off { --halo: 0; }
+  .offer-wrap.glow-off .offer { box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.6), 0 20px 60px rgba(0, 0, 0, 0.55); }
+  .offer { transition: box-shadow 0.6s ease; }
+  .settings-btn { transition: opacity 0.6s ease; }
+  body.scene-dark .settings-btn { opacity: 0; pointer-events: none; }
+
+  /* Painted backgrounds for the offer (lure only) and the reveal (the anglerfish) */
+  .dive-bg { position: fixed; inset: 0; z-index: -1; background: #02060A center / cover no-repeat; opacity: 0; pointer-events: none; transition: opacity 0.6s ease; }
+  .dive-bg-dark { background-image: url(assets/bg-anglerfish-dark.jpg); }
+  .dive-bg-lit { background-image: url(assets/bg-anglerfish-lit.jpg); }
+  .dive-bg-lab { background-image: url(assets/bg-lab.jpg); }
+  .dive[data-bg="lab"] .dive-bg-lab { opacity: 1; }
+  .dive[data-bg="dark"] .dive-bg-dark, .dive[data-bg="lit"] .dive-bg-lit { opacity: 1; }
+  /* The lit painting dissolves in over the dark one, which stays underneath until it's done */
+  .dive.keep-dark .dive-bg-dark { opacity: 1; }
+  .dive-bg-lit { transition: opacity 2.2s ease; }
+  .reveal-slot { transition: opacity 0.5s ease; }
+  .lure-leaving .reveal-slot, .lure-leaving .lure-only { opacity: 0; transition: opacity 0.5s ease; }
+
+  /* Extra light on the revealed painting. The box matches the painting's "cover" crop,
+     so percentages line up with the art (the lure sits at about 48% / 36%). */
+  .dive-light {
+    position: fixed;
+    left: 50%;
+    top: 50%;
+    width: max(100vw, 160vh);
+    height: max(100vh, 62.5vw);
+    transform: translate(-50%, -50%);
+    z-index: -1;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 1.4s ease;
+    mix-blend-mode: screen;
+  }
+  .dive[data-bg="lit"] .dive-light { opacity: 1; transition-duration: 2.8s; transition-delay: 1.2s; }
+  .dive-light > div { position: absolute; inset: 0; }
+  .dl-lure {
+    background: radial-gradient(circle at 48.3% 35.6%, rgba(255, 255, 255, 0.75) 0, rgba(215, 255, 248, 0.5) 2.2%, rgba(130, 240, 222, 0.22) 6%, rgba(95, 227, 208, 0.08) 14%, transparent 24%);
+    transform-origin: 48.3% 35.6%;
+    animation: lure-flicker 5.5s ease-in-out infinite, lure-breathe 6.5s ease-in-out infinite;
+  }
+  .dl-bloom {
+    background: radial-gradient(circle at 48.3% 35.6%, rgba(95, 227, 208, 0.13) 0, rgba(70, 170, 200, 0.07) 22%, transparent 46%);
+    transform-origin: 48.3% 35.6%;
+    animation: lure-pulse 6.5s ease-in-out infinite, lure-breathe 6.5s ease-in-out infinite;
+  }
+  @keyframes lure-breathe { 0%, 100% { transform: scale(0.9); } 50% { transform: scale(1.12); } }
+  /* A soft cone of light falling from the lure toward the fish's face */
+  .dl-beam {
+    background: conic-gradient(from 112deg at 48.3% 35.6%, transparent 0deg, rgba(190, 248, 238, 0.11) 17deg, rgba(190, 248, 238, 0.05) 26deg, transparent 38deg);
+    -webkit-mask-image: radial-gradient(circle at 48.3% 35.6%, #000 0, rgba(0, 0, 0, 0.6) 22%, transparent 48%);
+    mask-image: radial-gradient(circle at 48.3% 35.6%, #000 0, rgba(0, 0, 0, 0.6) 22%, transparent 48%);
+    animation: lure-flicker 5.5s ease-in-out infinite;
+  }
+  .dl-spill {
+    background:
+      radial-gradient(ellipse 18% 16% at 61% 58%, rgba(150, 240, 225, 0.16), transparent 70%),
+      radial-gradient(ellipse 30% 26% at 70% 66%, rgba(95, 227, 208, 0.1), transparent 70%);
+    animation: lure-flicker 5.5s ease-in-out infinite -0.3s;
+  }
+  .dl-rim {
+    background:
+      radial-gradient(ellipse 60% 40% at 50% 0%, rgba(80, 150, 200, 0.12), transparent 70%),
+      radial-gradient(ellipse 45% 35% at 100% 100%, rgba(60, 120, 170, 0.14), transparent 70%),
+      radial-gradient(ellipse 40% 30% at 0% 90%, rgba(40, 90, 140, 0.1), transparent 70%);
+    animation: rim-drift 13s ease-in-out infinite;
+  }
+  @keyframes lure-pulse { 0%, 100% { opacity: 0.6; } 50% { opacity: 1; } }
+  /* A gentle, uneven glow like something alive (no fast flashing) */
+  @keyframes lure-flicker {
+    0%, 100% { opacity: 0.72; }
+    18% { opacity: 0.9; }
+    32% { opacity: 0.82; }
+    55% { opacity: 1; }
+    74% { opacity: 0.86; }
+  }
+  @keyframes rim-drift { 0%, 100% { opacity: 0.5; transform: translateX(-1.5%); } 50% { opacity: 1; transform: translateX(1.5%); } }
+  /* Darker edges pull the eye to the lure and the fish */
+  .dive-vignette {
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    background: radial-gradient(ellipse 80% 75% at 55% 48%, transparent 50%, rgba(1, 4, 8, 0.6) 100%);
+    opacity: 0;
+    transition: opacity 2.2s ease;
+  }
+  .dive[data-bg="lit"] .dive-vignette { opacity: 1; }
+  .dive-particles { position: fixed; inset: 0; width: 100%; height: 100%; z-index: -1; pointer-events: none; opacity: 0; transition: opacity 0.4s ease; }
+  .dive[data-bg="lit"] .dive-particles { opacity: 0.3; transition: opacity 2.2s ease; }
+  .dive[data-bg="lab"] .dive-particles { opacity: 1; }
+  html[data-motion="reduce"] .dive-light > div { animation: none; }
+  html[data-effects="reduce"] .dive-light, html[data-effects="reduce"] .dive-particles, html[data-effects="reduce"] .dive-vignette { display: none; }
+
+  /* Completion check: slams down from huge to its spot on the card */
+  .card > .slam-check {
+    position: absolute;
+    left: 39.97%;
+    top: 75.64%;
+    width: 10.12%;
+    height: 17.56%;
+    filter: none;
+    z-index: 3;
+    pointer-events: none;
+    opacity: 0;
+    transform-origin: 50% 55%;
+  }
+  .card > .slam-check.is-slam { animation: slam 0.42s cubic-bezier(0.55, 0, 0.9, 0.45) forwards; }
+  .card > .slam-check.is-fade { animation: fx-fade 0.35s ease forwards; }
+  @keyframes slam {
+    0% { opacity: 0; transform: scale(7) rotate(-14deg); }
+    25% { opacity: 1; }
+    80% { opacity: 1; transform: scale(1) rotate(0deg); }
+    90% { transform: scale(0.88, 0.94); }
+    100% { opacity: 1; transform: scale(1); }
+  }
+  .card > .card-over { position: absolute; inset: 0; width: 100%; height: 100%; filter: none; opacity: 0; transition: opacity 0.35s ease; }
+  .card > .card-over.is-in { opacity: 1; }
+  .card.is-hit { animation: card-hit 0.28s ease-out; }
+  @keyframes card-hit {
+    0% { transform: translate(-50%, var(--card-settle)); }
+    25% { transform: translate(calc(-50% + 4px), calc(var(--card-settle) + 5px)); }
+    55% { transform: translate(calc(-50% - 3px), calc(var(--card-settle) - 2px)); }
+    100% { transform: translate(-50%, var(--card-settle)); }
+  }
+  .burst { position: absolute; left: 45%; top: 84.4%; width: 0; height: 0; z-index: 4; pointer-events: none; }
+  .burst span {
+    position: absolute;
+    left: 0;
+    top: 0;
+    border-radius: 52% 48% 50% 46%;
+    background: #6FD47A;
+    box-shadow: 0 0 6px rgba(111, 212, 122, 0.6);
+    transform: translate(-50%, -50%);
+    animation: burst-out 0.7s cubic-bezier(0.15, 0.8, 0.3, 1) forwards;
+  }
+  .burst span:nth-child(3n) { background: #8EDB86; }
+  .burst span:nth-child(4n) { background: #5CC06B; }
+  @keyframes burst-out {
+    0% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+    70% { opacity: 0.8; }
+    100% { opacity: 0; transform: translate(calc(-50% + var(--dx)), calc(-50% + var(--dy))) scale(0.4); }
+  }
+
+  /* On the reveal, the offer is a snapshot pinned to the case: tilted, taped, a little faded */
+  .offer.inspect { transform: rotate(-1.5deg); }
+  .offer.inspect::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    z-index: 1;
+    background: #808080;
+    mix-blend-mode: saturation;
+    pointer-events: none;
+  }
+  .offer.inspect .mark { z-index: 2; }
+  .offer.inspect[data-hl="1"] [data-trick~="1"], .offer.inspect[data-hl="2"] [data-trick~="2"], .offer.inspect[data-hl="3"] [data-trick~="3"],
+  .offer.inspect[data-hl="4"] [data-trick~="4"], .offer.inspect[data-hl="5"] [data-trick~="5"], .offer.inspect[data-hl="6"] [data-trick~="6"] { position: relative; z-index: 2; }
+  .offer.inspect::before {
+    content: "EVIDENCE";
+    position: absolute;
+    left: 50%;
+    top: -0.95rem;
+    z-index: 3;
+    padding: 0.15rem 1.4rem 0.25rem;
+    background: rgba(232, 220, 192, 0.92);
+    color: #3A2E26;
+    font-family: "Patrick Hand", var(--font-hand);
+    font-size: 1.05rem;
+    letter-spacing: 0.12em;
+    transform: translateX(-50%) rotate(2.5deg);
+    clip-path: polygon(2% 8%, 98% 0, 100% 92%, 1% 100%);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
+  }
+  .reveal-slot { position: relative; }
+  .snapshot-note {
+    position: absolute;
+    left: 50%;
+    top: 46%;
+    z-index: 8;
+    width: max-content;
+    max-width: 18rem;
+    margin: 0;
+    padding: 0.45rem 0.9rem 0.55rem;
+    border: 2.5px solid var(--ink-line);
+    border-radius: var(--wobble-sm);
+    background: var(--sea-panel);
+    color: var(--sea-text);
+    font-family: var(--font-ui);
+    font-size: 1.15rem;
+    line-height: 1.3;
+    text-align: center;
+    box-shadow: 0 10px 28px rgba(0, 0, 0, 0.5);
+    opacity: 0;
+    transform: translate(-50%, -40%);
+    pointer-events: none;
+    transition: opacity 0.25s ease, transform 0.25s var(--ease-gear);
+  }
+  .snapshot-note.is-on { opacity: 1; transform: translate(-50%, -50%); }
+  .reveal-layout { position: relative; }
+  .hb-go.is-nudge { animation: nudge 0.5s ease 2; }
+  @keyframes nudge { 0%, 100% { transform: none; } 30% { transform: translateY(-5px) scale(1.04); } 60% { transform: translateY(1px); } }
+  html[data-motion="reduce"] .offer.inspect { transform: none; }
+  html[data-font="clear"] .snapshot-note { font-size: 0.95rem; }
+
+  /* ---------- Redesign Lab: sunlight from the surface ---------- */
+  .lab-light { position: fixed; inset: 0; z-index: -1; pointer-events: none; overflow: hidden; opacity: 0; transition: opacity 0.8s ease; }
+  .dive[data-bg="lab"] .lab-light { opacity: 1; }
+  .lab-light > div { position: absolute; }
+  /* A bright, soft glow where the light enters from above */
+  .ll-surface {
+    inset: 0;
+    background:
+      radial-gradient(ellipse 55% 30% at 50% -6%, rgba(200, 250, 245, 0.42), rgba(120, 210, 225, 0.16) 45%, transparent 75%),
+      radial-gradient(ellipse 90% 55% at 50% -10%, rgba(95, 200, 220, 0.22), transparent 70%),
+      linear-gradient(to bottom, rgba(120, 200, 220, 0.10), transparent 40%);
+    mix-blend-mode: screen;
+    animation: surface-breathe 9s ease-in-out infinite;
+  }
+  @keyframes surface-breathe { 0%, 100% { opacity: 0.85; } 50% { opacity: 1; } }
+  /* Shafts of sunlight fanning down from the surface */
+  .ll-ray {
+    top: -12%;
+    height: 105%;
+    background: linear-gradient(to bottom, rgba(190, 245, 240, 0.20), rgba(150, 230, 230, 0.07) 50%, transparent 88%);
+    filter: blur(18px);
+    transform-origin: 50% 0;
+    mix-blend-mode: screen;
+    animation: shaft 15s ease-in-out infinite;
+  }
+  .ll-ray:nth-child(2) { left: 18%; width: 7vw; --tilt: 22deg; animation-delay: -4s; }
+  .ll-ray:nth-child(3) { left: 36%; width: 11vw; --tilt: 9deg; animation-duration: 19s; }
+  .ll-ray:nth-child(4) { left: 50%; width: 6vw; --tilt: -2deg; animation-delay: -9s; animation-duration: 17s; }
+  .ll-ray:nth-child(5) { left: 61%; width: 10vw; --tilt: -12deg; animation-delay: -2s; animation-duration: 21s; }
+  .ll-ray:nth-child(6) { left: 78%; width: 6vw; --tilt: -24deg; animation-delay: -12s; }
+  @keyframes shaft {
+    0%, 100% { opacity: 0.4; transform: rotate(var(--tilt)) scaleX(1); }
+    50% { opacity: 1; transform: rotate(calc(var(--tilt) + 3deg)) scaleX(1.15); }
+  }
+  /* Rippling light patterns near the top, like sunlight through waves */
+  .ll-caustics {
+    left: -10%;
+    right: -10%;
+    top: 0;
+    height: 42%;
+    background:
+      radial-gradient(ellipse 6% 2.4% at 20% 30%, rgba(210, 255, 250, 0.18), transparent 70%),
+      radial-gradient(ellipse 8% 2.8% at 42% 18%, rgba(210, 255, 250, 0.16), transparent 70%),
+      radial-gradient(ellipse 5% 2% at 63% 34%, rgba(210, 255, 250, 0.16), transparent 70%),
+      radial-gradient(ellipse 7% 2.6% at 82% 22%, rgba(210, 255, 250, 0.14), transparent 70%),
+      radial-gradient(ellipse 6% 2% at 33% 52%, rgba(210, 255, 250, 0.10), transparent 70%),
+      radial-gradient(ellipse 7% 2.2% at 72% 56%, rgba(210, 255, 250, 0.10), transparent 70%);
+    -webkit-mask-image: linear-gradient(to bottom, #000, transparent);
+    mask-image: linear-gradient(to bottom, #000, transparent);
+    mix-blend-mode: screen;
+    filter: blur(3px);
+    animation: caustics 12s ease-in-out infinite alternate;
+  }
+  @keyframes caustics {
+    0% { transform: translateX(-2%) scaleY(1); opacity: 0.6; }
+    50% { transform: translateX(1.5%) scaleY(1.2); opacity: 1; }
+    100% { transform: translateX(3%) scaleY(0.9); opacity: 0.7; }
+  }
+  /* The deep water gets darker toward the bottom */
+  .ll-floor { inset: 0; background: linear-gradient(to bottom, transparent 55%, rgba(3, 12, 22, 0.45)); }
+  html[data-motion="reduce"] .lab-light > div { animation: none; }
+  html[data-effects="reduce"] .lab-light, html[data-effects="reduce"] .fish-layer { display: none; }
+
+  /* Fish swimming past in the Redesign Lab */
+  .fish-layer { position: fixed; inset: 0; z-index: -1; pointer-events: none; overflow: hidden; }
+  .fish { position: absolute; left: 0; top: 0; will-change: transform; }
+  .fish img { display: block; width: 100%; height: auto; max-width: none; animation: fish-bob var(--bob, 2.6s) ease-in-out infinite; }
+  .fish.flip img { scale: -1 1; }
+  @keyframes fish-bob { 0%, 100% { transform: translateY(-4px) rotate(-2deg); } 50% { transform: translateY(4px) rotate(2deg); } }
+
+  /* Flip between case files with arrows at the sides */
+  .case-arrow {
+    position: absolute;
+    z-index: 4;
+    top: calc(var(--card-top) + var(--card-settle) + var(--card-h) / 2);
+    width: 4.6rem;
+    height: 4.6rem;
+    padding: 0;
+    border: 0;
+    border-radius: 50%;
+    background: none;
+    cursor: pointer;
+    opacity: 0;
+    pointer-events: none;
+    transform: translateY(-50%);
+    transition: opacity 0.45s ease, translate 0.45s var(--ease-gear);
+  }
+  .case-arrow.prev { left: max(12px, calc((100vw - var(--card-w)) / 2 - 5.4rem)); translate: -50px 0; }
+  .case-arrow.next { right: max(12px, calc((100vw - var(--card-w)) / 2 - 5.4rem)); translate: 50px 0; }
+  .case-arrow.prev svg { scale: -1 1; }
+  .is-research .case-arrow { opacity: 1; translate: 0 0; pointer-events: auto; }
+  .case-arrow svg { display: block; width: 100%; height: 100%; overflow: visible; }
+  .case-arrow path {
+    fill: var(--lure-hex);
+    stroke: var(--ink-line);
+    stroke-width: 4;
+    stroke-linejoin: round;
+    filter: drop-shadow(0 4px 0 var(--ink-line)) drop-shadow(0 0 10px rgba(var(--lure), 0.35));
+    transition: fill 0.2s ease, filter 0.2s ease;
+  }
+  .case-arrow:hover path { fill: #8AF0E2; filter: drop-shadow(0 4px 0 var(--ink-line)) drop-shadow(0 0 18px rgba(var(--lure), 0.65)); }
+  .case-arrow:active svg { translate: 0 3px; }
+  .case-arrow:focus-visible { outline: 2px solid var(--lure-hex); outline-offset: 4px; }
+  html[data-effects="reduce"] .case-arrow path { stroke: #FFFFFF; filter: none; }
+
+  /* Locked cases: the description sits left of the padlock */
+  .card[data-case="jellyfish"] .card-notes { top: 27%; height: 49%; }
+  .card[data-case="octopus"] .card-notes { top: 40.5%; height: 36%; }
+  /* A padlock clipped onto the corner of a locked file; it rattles when you try to open it */
+  .card > .card-lock {
+    display: none;
+    position: absolute;
+    left: 85%;
+    top: 66%;
+    width: 12.5%;
+    height: auto;
+    z-index: 2;
+    rotate: 9deg;
+    transform-origin: 50% 10%;
+    filter: drop-shadow(0 6px 10px rgba(0, 0, 0, 0.5));
+    pointer-events: none;
+  }
+  .card[data-case="jellyfish"] > .card-lock, .card[data-case="octopus"] > .card-lock { display: block; }
+  .card.is-denied > .card-lock { animation: lock-rattle 0.45s ease; }
+  @keyframes lock-rattle {
+    0%, 100% { transform: rotate(0deg); }
+    20% { transform: rotate(-14deg); }
+    40% { transform: rotate(11deg); }
+    60% { transform: rotate(-7deg); }
+    80% { transform: rotate(4deg); }
+  }
+  html[data-motion="reduce"] .card.is-denied > .card-lock { animation: none; }
+
+  /* Research button on a locked case: grayed out, and it refuses when clicked */
+  .research-btn.is-locked { background: #3F4549; color: #A3AAAE; border-color: #2A2F32; cursor: not-allowed; box-shadow: 0 5px 0 #2A2F32, 0 14px 32px rgba(0, 0, 0, 0.45); }
+  .is-research .research-btn.is-locked:hover { background: #474E52; text-shadow: none; }
+  .is-research .research-btn.is-locked:active { transform: translate(-50%, var(--card-settle)); }
+  .research-btn.is-denied { animation: deny 0.45s ease; }
+  @keyframes deny {
+    0%, 100% { translate: 0 0; }
+    15% { translate: -10px 0; background: #9B3333; color: #FFE3E3; border-color: #4A1212; box-shadow: 0 5px 0 #4A1212, 0 14px 32px rgba(0, 0, 0, 0.45); }
+    35% { translate: 9px 0; background: #9B3333; color: #FFE3E3; border-color: #4A1212; box-shadow: 0 5px 0 #4A1212, 0 14px 32px rgba(0, 0, 0, 0.45); }
+    55% { translate: -6px 0; background: #8A3434; border-color: #4A1212; box-shadow: 0 5px 0 #4A1212, 0 14px 32px rgba(0, 0, 0, 0.45); }
+    75% { translate: 4px 0; }
+  }
+  html[data-motion="reduce"] .research-btn.is-denied { animation: deny-flash 0.45s ease; }
+  @keyframes deny-flash { 20%, 60% { background: #9B3333; color: #FFE3E3; border-color: #4A1212; box-shadow: 0 5px 0 #4A1212, 0 14px 32px rgba(0, 0, 0, 0.45); } }
+
+  .sr-only {
+    position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+    overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0;
+  }
+
+  /* Reduce motion: everything holds still at a steady, visible glow */
+  html[data-motion="reduce"] *, html[data-motion="reduce"] *::before, html[data-motion="reduce"] *::after { transition: none !important; }
+  html[data-motion="reduce"] .ray { animation: none; opacity: 0.7; transform: rotate(var(--tilt)); }
+  html[data-motion="reduce"] .logo { animation: none; filter: drop-shadow(0 0 32px rgba(var(--lure), 0.45)) drop-shadow(0 0 88px rgba(var(--lure), 0.24)); }
+  html[data-motion="reduce"] .case-folder img { animation: none; filter: drop-shadow(0 0 10px rgba(var(--lure), 0.7)); }
+  html[data-motion="reduce"] .case-folder:hover img,
+  html[data-motion="reduce"] .case-folder:focus-visible img { transform: none; filter: drop-shadow(0 0 16px rgba(var(--lure), 1)); }
+  html[data-motion="reduce"] .tip { transform: none; }
+
+  /* Reduce effects: no atmosphere, crisp outlines, solid backgrounds */
+  html[data-effects="reduce"] .ray,
+  html[data-effects="reduce"] .snow,
+  html[data-effects="reduce"] .vignette,
+  html[data-effects="reduce"] .wall-spill,
+  html[data-effects="reduce"] .desk-glow,
+  html[data-effects="reduce"] .desk-shade { display: none; }
+  html[data-effects="reduce"] .room { background: var(--abyss); }
+  html[data-effects="reduce"] .logo { animation: none; filter: none; }
+  html[data-effects="reduce"] .case-folder img,
+  html[data-effects="reduce"] .case-folder:hover img,
+  html[data-effects="reduce"] .case-folder:focus-visible img {
+    animation: none;
+    filter: drop-shadow(0 0 1px var(--lure-hex)) drop-shadow(0 0 1px var(--lure-hex)) drop-shadow(0 0 1px var(--lure-hex));
+  }
+  html[data-effects="reduce"] .case-folder:focus-visible { outline: 3px solid #FFFFFF; }
+  html[data-effects="reduce"] .tip,
+  html[data-effects="reduce"] .tip::after,
+  html[data-effects="reduce"] .panel {
+    background-color: #06131B;
+    border-color: var(--lure-hex);
+    color: #FFFFFF;
+  }
+  html[data-effects="reduce"] .setting p { color: #E2F0F0; }
+  html[data-effects="reduce"] .settings-btn img { filter: brightness(1.8); }
+  html[data-effects="reduce"] .hint { color: #FFFFFF; }
+</style>
+</head>
+<body>
+<div class="room" aria-hidden="true">
+  <div class="ray"></div>
+  <div class="ray"></div>
+  <div class="ray"></div>
+  <canvas class="snow"></canvas>
+</div>
+
+<h1 class="sr-only">LURE: a deep-sea investigation into deceptive design</h1>
+
+<main class="stage">
+  <div class="layer desk-group">
+    <div class="layer wall-spill" aria-hidden="true"></div>
+    <img class="layer" src="assets/desk.png" alt="A research desk with an aquarium, specimen reports, a starfish, seashells, a nautilus shell, a pen and a coffee mug">
+    <div class="layer desk-mask desk-shade" aria-hidden="true"></div>
+    <div class="layer desk-mask desk-glow" aria-hidden="true"></div>
+  </div>
+  <img class="layer logo" src="assets/logo.png" alt="LURE">
+  <button class="case-folder" id="case-folder" type="button" aria-label="Open case file" data-tip="Dive into a deep sea mystery…">
+    <img src="assets/folder-secret-teal.png" alt="">
+  </button>
+</main>
+
+<div class="vignette" aria-hidden="true"></div>
+
+<section class="case-view" id="case-view" aria-labelledby="case-title" inert>
+  <h2 class="sr-only" id="case-title">Case 001: Anglerfish</h2>
+  <button class="back-btn" id="back-btn" type="button" data-tip="Close the file and return to the desk">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5.5 8.5 12.2l6.8 6.3"/></svg>
+    Desk
+  </button>
+  <img class="fold fold-tab" src="assets/folder-tab.png" alt="">
+  <button class="case-arrow prev" id="case-prev" type="button" aria-label="Previous case" data-tip="Previous case"><svg viewBox="0 0 60 60" aria-hidden="true"><path d="M17 8.5 C 30 15, 41 22, 52 29.5 C 41 37.5, 29 44, 17.5 51.5 C 15.5 37, 15 23, 17 8.5 Z"/></svg></button>
+  <button class="case-arrow next" id="case-next" type="button" aria-label="Next case" data-tip="Next case"><svg viewBox="0 0 60 60" aria-hidden="true"><path d="M17 8.5 C 30 15, 41 22, 52 29.5 C 41 37.5, 29 44, 17.5 51.5 C 15.5 37, 15 23, 17 8.5 Z"/></svg></button>
+  <figure class="card" data-case="anglerfish">
+    <img class="card-lock" src="assets/padlock.png" alt="">
+    <img id="card-img" src="assets/card-anglerfish.png" alt="Case card for the anglerfish. Status: unresolved. Photograph: not available.">
+    <p class="card-notes">First sighted thousands of meters deep, well into the midnight zone of the Pacific Ocean. Divers reported a single, small light drifting in the dark that radiated a deceptively welcoming feeling. Strangely, none of them were able to describe the creature behind it.</p>
+  </figure>
+  <img class="fold fold-front" src="assets/folder-screen.png" alt="">
+  <button class="research-btn" id="research-btn" type="button" data-tip="Take a dive?">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10.3 3.6c3.7-.2 6.6 2.6 6.6 6.3 0 3.6-2.9 6.6-6.5 6.6-3.7 0-6.6-2.8-6.6-6.4 0-3.5 2.9-6.4 6.5-6.5z"/><path d="M15.4 15.3l5 5.2"/></svg>
+    <span class="research-label">Research</span>
+  </button>
+</section>
+
+<button class="settings-btn" id="settings-btn" type="button" aria-label="Settings" aria-expanded="false" aria-controls="settings-panel" data-tip="Settings">
+  <img src="assets/gear.png" alt="">
+</button>
+
+<section class="panel" id="settings-panel" role="dialog" aria-labelledby="settings-title" inert>
+  <h2 id="settings-title">Settings</h2>
+  <ul class="settings-list">
+    <li class="setting">
+      <div class="setting-text">
+        <label for="opt-motion">Reduce motion</label>
+        <p id="opt-motion-desc">Removes all glowing, drifting, and zooming animations.</p>
+      </div>
+      <input class="switch" type="checkbox" role="switch" id="opt-motion" data-key="motion" data-on="reduce" data-off="full" aria-describedby="opt-motion-desc">
+    </li>
+    <li class="setting">
+      <div class="setting-text">
+        <label for="opt-text">Larger text</label>
+        <p id="opt-text-desc">Makes most text larger.</p>
+      </div>
+      <input class="switch" type="checkbox" role="switch" id="opt-text" data-key="text" data-on="large" data-off="normal" aria-describedby="opt-text-desc">
+    </li>
+    <li class="setting">
+      <div class="setting-text">
+        <label for="opt-effects">Reduce visual effects</label>
+        <p id="opt-effects-desc">Removes lighting effects and swaps to high-contrast interfaces.</p>
+      </div>
+      <input class="switch" type="checkbox" role="switch" id="opt-effects" data-key="effects" data-on="reduce" data-off="full" aria-describedby="opt-effects-desc">
+    </li>
+    <li class="setting">
+      <div class="setting-text">
+        <label for="opt-font">Clearer font</label>
+        <p id="opt-font-desc">Swaps the handwritten-style font (Patrick Hand) to a font that's easier to read (Atkinson Hyperlegible).</p>
+      </div>
+      <input class="switch" type="checkbox" role="switch" id="opt-font" data-key="font" data-on="clear" data-off="hand" aria-describedby="opt-font-desc">
+    </li>
+  </ul>
+  <div class="panel-actions">
+    <button class="panel-done" id="settings-done" type="button">Done</button>
+  </div>
+</section>
+
+<template id="offer-tpl">
+  <div class="offer-wrap">
+    <div class="offer">
+      <div class="offer-top">
+        <span class="brand"><span class="brand-dot" aria-hidden="true"></span>Lumen+</span>
+        <span class="timer" data-trick="5">Offer ends in <span class="timer-time">04:59</span><span class="mark mark-5" aria-hidden="true">5</span></span>
+      </div>
+      <h3 class="offer-head">Unlimited everything. <span class="free">At <strong>no</strong> cost.</span></h3>
+      <p class="offer-sub">Movies, music, books and more. Join over 2 million members today.</p>
+      <p class="price-line">Free for 7 days, then <b>$14.99 a month</b>, billed once a year ($179.88).</p>
+      <button class="offer-cta" type="button" data-action="accept" data-trick="1">Start my FREE trial<span class="mark mark-1" aria-hidden="true">1</span></button>
+      <div><label class="addon" data-trick="3"><input type="checkbox" class="addon-box" checked> Add Premium Bundle (+$4.99/month)<span class="mark mark-3" aria-hidden="true">3</span></label></div>
+      <div class="offer-alt" data-trick="4"><button class="offer-decline" type="button" data-action="decline"><span class="decline-text">I'd rather miss out</span></button><span class="mark mark-4" aria-hidden="true">4</span></div>
+      <p class="fine" data-trick="2 6"><span class="fine-text">*Free trial lasts 7 days. After your trial, your membership will automatically renew at $14.99/month, billed annually for $179.88. Premium Bundle adds $4.99/month. To avoid charges, cancel at least 48 hours before your trial ends by calling our service number.</span><span class="mark mark-2" aria-hidden="true">2</span><span class="mark mark-6" aria-hidden="true">6</span></p>
+    </div>
+  </div>
+</template>
+
+<div class="dive" id="dive" aria-hidden="true" inert>
+  <div class="dive-bg dive-bg-dark" aria-hidden="true"></div>
+  <div class="dive-bg dive-bg-lit" aria-hidden="true"></div>
+  <div class="dive-bg dive-bg-lab" aria-hidden="true"></div>
+  <div class="lab-light" aria-hidden="true">
+    <div class="ll-surface"></div>
+    <div class="ll-ray"></div><div class="ll-ray"></div><div class="ll-ray"></div><div class="ll-ray"></div><div class="ll-ray"></div>
+    <div class="ll-caustics"></div>
+    <div class="ll-floor"></div>
+  </div>
+  <div class="fish-layer" aria-hidden="true"></div>
+  <div class="dive-light" aria-hidden="true"><div class="dl-rim"></div><div class="dl-bloom"></div><div class="dl-beam"></div><div class="dl-spill"></div><div class="dl-lure"></div></div>
+  <div class="dive-vignette" aria-hidden="true"></div>
+  <canvas class="dive-particles" aria-hidden="true"></canvas>
+  <div class="dive-fader" id="dive-fader" aria-hidden="true"></div>
+  <button class="hb surface-btn" id="surface-btn" type="button" data-tip="Desk">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 19.5V5.2M6 10.8l6-5.9 6.1 6"/></svg>
+    Desk
+  </button>
+
+
+  <section class="screen" data-stage="reveal" tabindex="-1" aria-labelledby="reveal-title" hidden>
+    <h2 class="sr-only lure-only" id="lure-title">A glowing offer in the dark</h2>
+    <p class="depth-label lure-only">Case 001 · Midnight zone · 2,432m Below the Surface</p>
+    <h2 style="--d:0.45s" class="fx fx-hero screen-title" id="reveal-title"></h2>
+    <p style="--d:1.3s" class="fx screen-sub" id="reveal-sub"></p>
+    <div class="fx-group receipt-bar" id="receipt" aria-label="True cost of the trial"></div>
+    <div style="--d:4.45s" class="fx reveal-layout">
+      <ol class="tricks tricks-left">
+        <li tabindex="0" data-n="1"><span class="num">1</span><span><b>Glowing Button</b><span class="why">The big, bright button in the center is the one that makes the company money!</span></span></li>
+        <li tabindex="0" data-n="2"><span class="num">2</span><span><b>Hidden Price</b><span class="why">The big "no cost" headline distracts users from the $179.88/year charge.</span></span></li>
+        <li tabindex="0" data-n="3"><span class="num">3</span><span><b>Sneaky Add-on</b><span class="why">The "Premium Bundle" is checked by default, quietly adding to the total cost.</span></span></li>
+      </ol>
+      <div class="offer-stage reveal-slot"></div>
+      <p class="snapshot-note" id="snapshot-note" aria-live="polite"></p>
+      <ol class="tricks tricks-right" start="4">
+        <li tabindex="0" data-n="4"><span class="num">4</span><span><b>Guilt Trip</b><span class="why">The decline option says "I'd rather miss out", and nobody wants to miss out.</span></span></li>
+        <li tabindex="0" data-n="5"><span class="num">5</span><span><b>Fake Timer</b><span class="why">The countdown isn't real. It only exists to pressure users into deciding fast.</span></span></li>
+        <li tabindex="0" data-n="6"><span class="num">6</span><span><b>Trapdoor</b><span class="why">Subscribing is easy, but cancelling requires a two-day heads-up over the phone.</span></span></li>
+      </ol>
+    </div>
+    <div style="--d:5.6s" class="fx screen-actions reveal-actions">
+      <p class="reveal-count" id="reveal-count">This offer is hiding six tricks!</p>
+      <button class="hb hb-go hb-go-sm" id="reveal-next" type="button">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10.3 3.6c3.7-.2 6.6 2.6 6.6 6.3 0 3.6-2.9 6.6-6.5 6.6-3.7 0-6.6-2.8-6.6-6.4 0-3.5 2.9-6.4 6.5-6.5z"/><path d="M15.4 15.3l5 5.2"/></svg>
+        <span class="reveal-next-label">Reveal the First Trick</span>
+      </button>
+      <button class="hb hb-go" id="to-lab" type="button" data-tip="Redesign the offer" hidden>
+        Enter the Redesign Lab
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4.5 12.2h14.2M13 6.3l5.9 5.9-6 5.8"/></svg>
+      </button>
+      <p class="sr-only" id="reveal-live" aria-live="polite"></p>
+    </div>
+  </section>
+
+  <section class="screen" data-stage="lab" tabindex="-1" aria-labelledby="lab-title" hidden>
+    <h2 class="screen-title" id="lab-title">Redesign Lab</h2>
+    <p class="screen-sub">Edit the offer to clear the waters. Let the decision come naturally rather than deceptively.</p>
+    <div class="lab-grid">
+      <div class="lab-preview" id="lab-preview">
+        <div class="lab-slot"></div>
+      </div>
+      <div class="hand-panel">
+        <h3>Your changes</h3>
+        <ul class="lab-list">
+          <li class="lab-row" data-fix="balance">
+            <div><label for="fix-balance">Give both choices equal weight<span class="done-tick" aria-hidden="true">✓</span></label><span class="hint-text">Saying no should be as easy to find as saying yes.</span></div>
+            <input class="switch" type="checkbox" role="switch" id="fix-balance">
+          </li>
+          <li class="lab-row" data-fix="price">
+            <div><label for="fix-price">Show the real price<span class="done-tick" aria-hidden="true">✓</span></label><span class="hint-text">Put the cost right next to the button.</span></div>
+            <input class="switch" type="checkbox" role="switch" id="fix-price">
+          </li>
+          <li class="lab-row" data-fix="addon">
+            <div><label for="fix-addon">Leave the extra unchecked<span class="done-tick" aria-hidden="true">✓</span></label><span class="hint-text">Let people pick add-ons themselves.</span></div>
+            <input class="switch" type="checkbox" role="switch" id="fix-addon">
+          </li>
+          <li class="lab-row stack" data-fix="wording">
+            <fieldset class="lab-row stack" style="padding:0;background:none">
+              <legend>Decline wording<span class="done-tick" aria-hidden="true">✓</span></legend>
+              <div class="choices">
+                <label class="choice"><input type="radio" name="fix-wording" value="shame" checked><span>I'd rather miss out</span></label>
+                <label class="choice"><input type="radio" name="fix-wording" value="plain"><span>No thanks</span></label>
+                <label class="choice"><input type="radio" name="fix-wording" value="neutral"><span>Continue without a trial</span></label>
+              </div>
+            </fieldset>
+          </li>
+          <li class="lab-row" data-fix="timer">
+            <div><label for="fix-timer">Remove the fake countdown<span class="done-tick" aria-hidden="true">✓</span></label><span class="hint-text">No invented deadlines.</span></div>
+            <input class="switch" type="checkbox" role="switch" id="fix-timer">
+          </li>
+          <li class="lab-row stack" data-fix="terms">
+            <div><label for="fix-terms">Make the terms readable<span class="done-tick" aria-hidden="true">✓</span></label><span class="hint-text">Bigger, darker and in plain words, with online cancelling.</span></div>
+            <input class="terms-range" type="range" id="fix-terms" min="0" max="2" step="1" value="0" aria-valuetext="Tiny">
+            <div class="range-labels" aria-hidden="true"><span>Tiny</span><span>Small</span><span>Acceptable</span></div>
+          </li>
+        </ul>
+        <div class="gauge-row">
+          <div class="gauge-head">Clarity <span id="gauge-count">0 of 6 fixed</span></div>
+          <div class="gauge" aria-hidden="true"><div class="gauge-fill"></div></div>
+        </div>
+        <p class="lab-message" id="lab-message" aria-live="polite"></p>
+        <button class="hb hb-go lab-file" id="file-report" type="button" aria-disabled="true" data-tip="Close the Case">File the Report</button>
+      </div>
+    </div>
+  </section>
+
+</div>
+
+<div class="fader" id="fader" aria-hidden="true"></div>
+<div class="tip" id="tip" role="tooltip"></div>
+
+<script>
+  const root = document.documentElement;
+
+  /* ---------- Settings ---------- */
+  const Settings = {
+    get(key) { return root.dataset[key]; },
+    set(key, value) {
+      root.dataset[key] = value;
+      try {
+        const saved = JSON.parse(localStorage.getItem('lure-settings') || '{}');
+        saved[key] = value;
+        localStorage.setItem('lure-settings', JSON.stringify(saved));
+      } catch (e) {}
+      document.dispatchEvent(new CustomEvent('lure:settings', { detail: { key, value } }));
+    },
+    reducedMotion() { return root.dataset.motion === 'reduce'; },
+    reducedEffects() { return root.dataset.effects === 'reduce'; }
+  };
+  window.LureSettings = Settings;
+
+  const settingsBtn = document.getElementById('settings-btn');
+  const panel = document.getElementById('settings-panel');
+  const switches = panel.querySelectorAll('.switch');
+
+  switches.forEach((sw) => {
+    sw.checked = Settings.get(sw.dataset.key) === sw.dataset.on;
+    sw.addEventListener('change', () => Settings.set(sw.dataset.key, sw.checked ? sw.dataset.on : sw.dataset.off));
+    /* Checkboxes only toggle with Space by default; Enter works too here */
+    sw.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') { e.preventDefault(); sw.click(); }
+    });
+  });
+
+  const isOpen = () => panel.classList.contains('is-open');
+  function openPanel() {
+    panel.inert = false;
+    panel.classList.add('is-open');
+    settingsBtn.setAttribute('aria-expanded', 'true');
+    hideTip();
+    switches[0].focus({ preventScroll: true });
+  }
+  function closePanel(returnFocus = true) {
+    if (!isOpen()) return;
+    panel.classList.remove('is-open');
+    panel.inert = true;
+    settingsBtn.setAttribute('aria-expanded', 'false');
+    if (returnFocus) settingsBtn.focus({ preventScroll: true });
+  }
+  settingsBtn.addEventListener('click', () => (isOpen() ? closePanel() : openPanel()));
+  document.getElementById('settings-done').addEventListener('click', () => closePanel());
+  document.addEventListener('pointerdown', (e) => {
+    if (isOpen() && !panel.contains(e.target) && !settingsBtn.contains(e.target)) closePanel(false);
+  });
+  document.addEventListener('keydown', (e) => {
+    if (e.key !== 'Escape') return;
+    hideTip();
+    if (isOpen()) closePanel();
+    else if (!Dive.isActive()) closeCase();
+  });
+
+  /* ---------- Tooltips: any element with data-tip ---------- */
+  const tip = document.getElementById('tip');
+  let tipTarget = null, showTimer = null, hideTimer = null;
+
+  function placeTip(el) {
+    /* Measure from the top-left corner so the old position can't squeeze or wrap the text */
+    tip.style.left = '0px';
+    tip.style.top = '0px';
+    const r = el.getBoundingClientRect();
+    const t = tip.getBoundingClientRect();
+    const gap = 12;
+    let top = r.top - t.height - gap;
+    let below = false;
+    if (top < 8) { top = r.bottom + gap; below = true; }
+    let left = r.left + r.width / 2 - t.width / 2;
+    left = Math.max(16, Math.min(left, window.innerWidth - t.width - 16));
+    tip.style.top = `${top}px`;
+    tip.style.left = `${left}px`;
+    tip.style.setProperty('--arrow-x', `${r.left + r.width / 2 - left}px`);
+    tip.classList.toggle('below', below);
+  }
+  function showTip(el, delay) {
+    clearTimeout(hideTimer);
+    clearTimeout(showTimer);
+    if (el === tipTarget && tip.classList.contains('is-visible')) return;
+    showTimer = setTimeout(() => {
+      tipTarget = el;
+      tip.textContent = el.dataset.tip;
+      el.setAttribute('aria-describedby', 'tip');
+      tip.classList.add('is-visible');
+      placeTip(el);
+    }, delay);
+  }
+  function hideTip() {
+    clearTimeout(showTimer);
+    tip.classList.remove('is-visible');
+    if (tipTarget) tipTarget.removeAttribute('aria-describedby');
+    tipTarget = null;
+  }
+  function hideSoon() {
+    clearTimeout(showTimer);
+    hideTimer = setTimeout(hideTip, 120);
+  }
+
+  document.querySelectorAll('[data-tip]').forEach((el) => {
+    el.addEventListener('pointerenter', (e) => { if (e.pointerType !== 'touch') showTip(el, 250); });
+    el.addEventListener('pointerleave', hideSoon);
+    el.addEventListener('focus', () => { if (el.matches(':focus-visible')) showTip(el, 0); });
+    el.addEventListener('blur', hideTip);
+    el.addEventListener('click', hideTip);
+  });
+  tip.addEventListener('pointerenter', () => clearTimeout(hideTimer));
+  tip.addEventListener('pointerleave', hideSoon);
+  window.addEventListener('resize', () => { if (tipTarget) placeTip(tipTarget); });
+  if (document.fonts) document.fonts.ready.then(() => { if (tipTarget) placeTip(tipTarget); });
+
+  /* ---------- Case file: open and close sequence ---------- */
+  const caseView = document.getElementById('case-view');
+  const deskFolder = document.getElementById('case-folder');
+  const stage = document.querySelector('.stage');
+  const researchBtn = document.getElementById('research-btn');
+  let caseTimers = [];
+  const later = (fn, ms) => caseTimers.push(setTimeout(fn, ms));
+  const clearCaseTimers = () => { caseTimers.forEach(clearTimeout); caseTimers = []; };
+  const caseIsOpen = () => caseView.classList.contains('is-active');
+
+  const cardImg = document.getElementById('card-img');
+  const researchLabel = researchBtn.querySelector('.research-label');
+  const CARD_OPEN = 'assets/card-anglerfish.png';
+  const CARD_DONE = 'assets/card-anglerfish-done.png';
+  const CARD_NO_X = 'assets/card-anglerfish-nox.png';
+  const caseResolved = () => root.dataset.case1 === 'resolved';
+  const cardEl = caseView.querySelector('.card');
+  const cardNotes = cardEl.querySelector('.card-notes');
+  const CASES = [
+    {
+      id: 'anglerfish',
+      notes: cardNotes.textContent
+    },
+    {
+      id: 'jellyfish',
+      locked: true,
+      src: 'assets/card-jellyfish.png',
+      alt: 'Case card for the jellyfish. Locked. Status: unresolved.',
+      notes: 'First sighted drifting aimlessly through the twilight zone. Divers found it mesmerizing because of its gentle glow and steady pulsing. Yet those who reached out to touch it came back with marks they swore they never agreed to.'
+    },
+    {
+      id: 'octopus',
+      locked: true,
+      src: 'assets/card-octopus.png',
+      alt: 'Case card for the mimic octopus. Locked. Status: unresolved.',
+      notes: 'Reported across Indo-Pacific reefs as a lionfish, a sea snake, even a harmless flatfish. Only after thorough discussion did divers realize every sighting was the same disguised creature.'
+    }
+  ];
+  let caseIndex = 0;
+  const currentCase = () => CASES[caseIndex];
+  /* Load every card image up front so flipping to one never shows it half-loaded */
+  const preloaded = ['assets/padlock.png', 'assets/card-anglerfish.png', 'assets/card-anglerfish-done.png', 'assets/card-anglerfish-nox.png', 'assets/check.png',
+    ...CASES.filter((c) => c.src).map((c) => c.src)].map((src) => { const im = new Image(); im.src = src; return im; });
+
+  function showCardState() {
+    const c = currentCase();
+    cardEl.dataset.case = c.id;
+    cardNotes.textContent = c.notes;
+    researchBtn.classList.toggle('is-locked', !!c.locked);
+    researchBtn.setAttribute('aria-disabled', c.locked ? 'true' : 'false');
+    if (c.locked) {
+      cardImg.src = c.src;
+      cardImg.alt = c.alt;
+      researchLabel.textContent = 'Research';
+      researchBtn.dataset.tip = 'Not developed yet!';
+      return;
+    }
+    const done = caseResolved();
+    cardImg.src = done ? CARD_DONE : CARD_OPEN;
+    cardImg.alt = done ? 'Case card for the anglerfish. Status: resolved. Photograph: an anglerfish with its glowing lure and open jaws.' : 'Case card for the anglerfish. Status: unresolved. Photograph: not available.';
+    researchLabel.textContent = done ? 'Research Again' : 'Research';
+    researchBtn.dataset.tip = done ? 'Take another dive?' : 'Take a dive?';
+  }
+
+  /* Flip to the previous or next case file, looping around */
+  let switching = false, queued = 0;
+  function switchCase(dir) {
+    if (!caseView.classList.contains('is-research')) return;
+    if (switching) { queued = dir; return; }
+    const swap = () => {
+      caseIndex = (caseIndex + dir + CASES.length) % CASES.length;
+      showCardState();
+      fitNotes();
+      if (tipTarget === researchBtn) { tip.textContent = researchBtn.dataset.tip; placeTip(researchBtn); }
+    };
+    if (Settings.reducedMotion()) { swap(); return; }
+    switching = true;
+    const out = cardEl.animate(
+      [{ translate: '0 0', opacity: 1 }, { translate: `${-dir * 70}px 0`, opacity: 0 }],
+      { duration: 200, easing: 'cubic-bezier(0.55, 0, 1, 0.45)' }
+    );
+    out.onfinish = async () => {
+      swap();
+      try { await cardImg.decode(); } catch (e) {}
+      const back = cardEl.animate(
+        [{ translate: `${dir * 70}px 0`, opacity: 0 }, { translate: '0 0', opacity: 1 }],
+        { duration: 260, easing: 'cubic-bezier(0, 0.55, 0.45, 1)' }
+      );
+      back.onfinish = () => {
+        switching = false;
+        if (queued) { const q = queued; queued = 0; switchCase(q); }
+      };
+    };
+  }
+  document.getElementById('case-prev').addEventListener('click', () => switchCase(-1));
+  document.getElementById('case-next').addEventListener('click', () => switchCase(1));
+
+  /* Fade the whole screen to black, swap what is underneath, then fade back in */
+  const fader = document.getElementById('fader');
+  function fadeThrough(swap, after) {
+    const quick = Settings.reducedMotion();
+    hideTip();
+    fader.classList.add('is-on');
+    setTimeout(() => {
+      swap();
+      setTimeout(() => {
+        fader.classList.remove('is-on');
+        if (after) setTimeout(after, quick ? 0 : 600);
+      }, quick ? 0 : 150);
+    }, quick ? 0 : 650);
+  }
+
+  function openCase() {
+    if (caseIsOpen()) return;
+    clearCaseTimers();
+    hideTip();
+    caseIndex = 0;
+    showCardState();
+    const quick = Settings.reducedMotion();
+    document.body.classList.add('case-open');
+    stage.inert = true;
+    caseView.inert = false;
+    caseView.classList.remove('is-leaving');
+    caseView.classList.add('is-active');
+    requestAnimationFrame(() => requestAnimationFrame(() => caseView.classList.add('is-entered')));
+    later(() => caseView.classList.add('is-card-ready'), quick ? 0 : 680);
+    later(() => caseView.classList.add('is-card-up'), quick ? 0 : 720);
+    later(() => caseView.classList.add('is-folder-away', 'is-settled'), quick ? 0 : 1800);
+    later(() => caseView.classList.add('is-research'), quick ? 0 : 2650);
+    later(() => researchBtn.focus({ preventScroll: true }), quick ? 50 : 2750);
+  }
+
+  function closeCase() {
+    if (!caseIsOpen()) return;
+    clearCaseTimers();
+    hideTip();
+    caseView.classList.add('is-leaving');
+    document.body.classList.remove('case-open');
+    later(() => {
+      caseView.className = 'case-view';
+      caseView.inert = true;
+      stage.inert = false;
+      deskFolder.focus({ preventScroll: true });
+    }, Settings.reducedMotion() ? 0 : 420);
+  }
+
+  /* Keep the description inside its space on the card: shrink it slightly only if it would overflow */
+    function fitNotes() {
+    document.querySelectorAll('.card-notes').forEach((n) => {
+      if (!n.clientHeight) return;
+      let fit = 1;
+      n.style.setProperty('--note-fit', fit);
+      while (n.scrollHeight > n.clientHeight + 1 && fit > 0.7) {
+        fit -= 0.04;
+        n.style.setProperty('--note-fit', fit.toFixed(2));
+      }
+    });
+  }
+  window.addEventListener('resize', fitNotes);
+  document.addEventListener('lure:settings', fitNotes);
+  if (document.fonts) document.fonts.ready.then(fitNotes);
+
+  deskFolder.addEventListener('click', () => { openCase(); requestAnimationFrame(fitNotes); });
+  document.getElementById('back-btn').addEventListener('click', closeCase);
+  researchBtn.addEventListener('click', () => {
+    if (currentCase().locked) {
+      researchBtn.classList.remove('is-denied');
+      void researchBtn.offsetWidth;
+      researchBtn.classList.add('is-denied');
+      cardEl.classList.remove('is-denied');
+      void cardEl.offsetWidth;
+      cardEl.classList.add('is-denied');
+      setTimeout(() => cardEl.classList.remove('is-denied'), 500);
+      return;
+    }
+    Dive.enter();
+  });
+  researchBtn.addEventListener('animationend', () => researchBtn.classList.remove('is-denied'));
+  /* Left and right arrow keys flip through case files too */
+  document.addEventListener('keydown', (e) => {
+    if (e.key !== 'ArrowLeft' && e.key !== 'ArrowRight') return;
+    if (!caseView.classList.contains('is-research') || Dive.isActive() || isOpen()) return;
+    if (e.target instanceof HTMLInputElement) return;
+    e.preventDefault();
+    switchCase(e.key === 'ArrowLeft' ? -1 : 1);
+  });
+
+  /* ---------- The dive: encounter, lure, reveal, design lab, resolved ---------- */
+  const Dive = (() => {
+    const dive = document.getElementById('dive');
+    const screens = [...dive.querySelectorAll('.screen')];
+    const tpl = document.getElementById('offer-tpl');
+    let timers = [];
+    let clock = null;
+    let state = { outcome: null, addonKept: true };
+    const later = (fn, ms) => timers.push(setTimeout(fn, Settings.reducedMotion() ? Math.min(ms, 60) : ms));
+    const clearTimers = () => { timers.forEach(clearTimeout); timers = []; };
+
+    const makeOffer = () => tpl.content.firstElementChild.cloneNode(true);
+
+    function go(name, carried) {
+      hideTip();
+      stopClock();
+      const target = name === 'lure' ? 'reveal' : name;
+      screens.forEach((s) => { s.classList.remove('is-in'); s.hidden = s.dataset.stage !== target; });
+      const screen = screens.find((s) => s.dataset.stage === target);
+      screen.classList.toggle('is-luring', name === 'lure');
+      dive.scrollTop = 0;
+      dive.classList.toggle('is-lit', name !== 'lure');
+      dive.dataset.bg = name === 'lure' ? 'dark' : name === 'reveal' ? 'lit' : name === 'lab' ? 'lab' : 'none';
+      requestAnimationFrame(() => requestAnimationFrame(() => screen.classList.add('is-in')));
+      screen.focus({ preventScroll: true });
+      ({ lure: startLure, reveal: startReveal, lab: startLab })[name](carried);
+    }
+
+
+    /* The lure: the deceptive offer */
+    function startLure() {
+      const slot = dive.querySelector('.reveal-slot');
+      slot.innerHTML = '';
+      const wrap = makeOffer();
+      wrap.classList.add('glow-off');
+      slot.append(wrap);
+      dive.querySelector('[data-stage="reveal"]').classList.remove('enter-anim', 'lure-leaving', 'is-holding');
+      fillRevealText(true, true);
+      document.querySelectorAll('.reveal-layout .tricks li').forEach((li) => li.classList.remove('is-shown', 'is-current'));
+      const box = wrap.querySelector('.addon-box');
+      state.addonKept = true;
+      box.addEventListener('change', () => { state.addonKept = box.checked; });
+      wrap.querySelector('[data-action="accept"]').addEventListener('click', () => finishLure('caught'));
+      wrap.querySelector('[data-action="decline"]').addEventListener('click', () => finishLure('escaped'));
+      startClock(wrap.querySelector('.timer-time'));
+    }
+    function finishLure(outcome) {
+      state.outcome = outcome;
+      stopClock();
+      hideTip();
+      const wrap = dive.querySelector('.reveal-slot .offer-wrap');
+      wrap.inert = true;
+      const quick = Settings.reducedMotion();
+      const screenEl = dive.querySelector('[data-stage="reveal"]');
+      /* 1. The offer fades away */
+      screenEl.classList.add('lure-leaving');
+      /* 2. The dark painting dissolves into the lit one, revealing the anglerfish */
+      later(() => {
+        screenEl.classList.add('is-holding');
+        screenEl.classList.remove('is-luring', 'lure-leaving', 'enter-anim');
+        dive.classList.add('is-lit', 'keep-dark');
+        dive.dataset.bg = 'lit';
+        startReveal(wrap);
+      }, quick ? 60 : 1300);
+      later(() => dive.classList.remove('keep-dark'), quick ? 120 : 3650);
+      /* 3. The reveal fades in on top */
+      later(() => {
+        screenEl.classList.remove('is-holding');
+        void screenEl.offsetWidth;
+        screenEl.classList.add('enter-anim');
+      }, quick ? 160 : 3150);
+    }
+    function startClock(el) {
+      let secs = 299;
+      const show = () => { el.textContent = `${String(Math.floor(secs / 60)).padStart(2, '0')}:${String(secs % 60).padStart(2, '0')}`; };
+      show();
+      if (Settings.reducedMotion()) return;
+      clock = setInterval(() => { secs -= 1; if (secs < 0) secs = 299; show(); }, 1000);
+    }
+    function stopClock() { if (clock) clearInterval(clock); clock = null; }
+
+    /* The reveal */
+    const money = (n) => `$${n.toFixed(2)}`;
+    function startReveal(carried) {
+      fillRevealText(state.outcome === 'caught', state.addonKept);
+      restOfReveal(carried);
+    }
+    /* The reveal's text is filled in (but hidden) while the offer is showing, so the layout,
+       and the offer's position, are already final before the player chooses */
+    function fillRevealText(caught, addonKept) {
+      const addon = caught ? addonKept : true;
+      document.getElementById('reveal-title').textContent = caught ? 'You fell for the bait!' : 'You swam away!';
+      document.getElementById('reveal-sub').textContent = caught
+        ? "The offer's pretty glow distracted you."
+        : 'Nice instinct, you avoided the bait!';
+      const rows = [
+        ['Today', money(0)],
+        ['After 7 days, for the year', money(179.88)]
+      ];
+      if (addon) rows.push(['Premium Bundle, for the year', money(59.88)]);
+      const total = 179.88 + (addon ? 59.88 : 0);
+      document.getElementById('receipt').innerHTML =
+        /* Each part of the sum fades in on its own, left to right, with a beat before the total */
+        rows.map(([a, b], i) => {
+          const d = (1.9 + i * 0.4).toFixed(2);
+          const plus = i ? `<span class="op fx" style="--d:${d}s" aria-hidden="true">+</span>` : '';
+          return `${plus}<div class="rc fx" style="--d:${d}s"><span>${a}</span><b>${b}</b></div>`;
+        }).join('') +
+        `<span class="op fx" style="--d:${(1.9 + rows.length * 0.4 + 0.2).toFixed(2)}s" aria-hidden="true">=</span><div class="rc total fx" style="--d:${(1.9 + rows.length * 0.4 + 0.2).toFixed(2)}s"><span>${caught ? 'Your first year' : 'The first year would have cost'}</span><b>${money(total)}</b></div>`;
+    }
+    function restOfReveal(carried) {
+      const caught = state.outcome === 'caught';
+
+      const item3 = document.querySelector('.tricks li[data-n="3"] b');
+      item3.innerHTML = 'Sneaky Add-on' + (caught && !state.addonKept ? ' <span class="spotted">You spotted this one!</span>' : '');
+
+      const slot = dive.querySelector('.reveal-slot');
+      if (!carried) slot.innerHTML = '';
+      const wrap = carried || makeOffer();
+      wrap.inert = true;
+      wrap.setAttribute('aria-hidden', 'true');
+      const offer = wrap.querySelector('.offer');
+      offer.classList.add('inspect');
+      if (!carried) slot.append(wrap);
+      revealOffer = offer;
+      found = 0;
+      if (!carried) {
+        const screenEl = dive.querySelector('[data-stage="reveal"]');
+        screenEl.classList.remove('enter-anim');
+        void screenEl.offsetWidth;
+        screenEl.classList.add('enter-anim');
+      }
+      document.querySelectorAll('.reveal-layout .tricks li').forEach((li) => li.classList.remove('is-shown', 'is-current'));
+      document.getElementById('reveal-count').textContent = 'This offer is hiding six tricks!';
+      document.querySelector('.reveal-next-label').textContent = 'Reveal the First Trick';
+      document.getElementById('reveal-next').hidden = false;
+      document.getElementById('to-lab').hidden = true;
+      document.getElementById('reveal-live').textContent = '';
+      linkTricks(offer);
+    }
+
+    let revealOffer = null;
+    let found = 0;
+    document.getElementById('reveal-next').addEventListener('click', () => {
+      if (!revealOffer || found >= 6) return;
+      found += 1;
+      document.querySelectorAll('.reveal-layout .tricks li').forEach((li) => li.classList.remove('is-current'));
+      const li = document.querySelector(`.reveal-layout .tricks li[data-n="${found}"]`);
+      li.classList.add('is-shown', 'is-current');
+      revealOffer.querySelector(`.mark-${found}`).classList.add('is-shown');
+      revealOffer.dataset.hl = found;
+      document.getElementById('reveal-live').textContent = `Trick ${found}: ${li.querySelector('b').textContent}. ${li.querySelector('.why').textContent}`;
+      if (found < 6) {
+        document.getElementById('reveal-count').textContent = `${found} of 6 tricks found`;
+        document.querySelector('.reveal-next-label').textContent = 'Reveal the Next Trick';
+      } else {
+        document.getElementById('reveal-count').textContent = 'Now that you know the six tricks, you can fix them!';
+        document.getElementById('reveal-next').hidden = true;
+        const toLab = document.getElementById('to-lab');
+        toLab.hidden = false;
+        toLab.focus({ preventScroll: true });
+        toLab.scrollIntoView({ block: 'nearest', behavior: Settings.reducedMotion() ? 'auto' : 'smooth' });
+      }
+    });
+    function linkTricks(offer) {
+      document.querySelectorAll('.reveal-layout .tricks li').forEach((li) => {
+        const on = () => { offer.dataset.hl = li.dataset.n; };
+        const off = () => { if (found) offer.dataset.hl = found; else delete offer.dataset.hl; };
+        li.onmouseenter = on; li.onfocus = on;
+        li.onmouseleave = off; li.onblur = off;
+      });
+    }
+
+    /* The Redesign Lab */
+    const HONEST_TERMS = 'Free for 7 days, then $14.99 a month, billed once a year ($179.88). Premium Bundle is optional and costs $4.99 a month. Cancel online at any time before your trial ends and you will not be charged.';
+    const WORDING = { shame: "I'd rather miss out", plain: 'No thanks', neutral: 'Continue without a trial' };
+    let labOffer = null;
+    function startLab() {
+      const slot = dive.querySelector('.lab-slot');
+      slot.innerHTML = '';
+      const wrap = makeOffer();
+      wrap.inert = true;
+      wrap.setAttribute('aria-hidden', 'true');
+      slot.append(wrap);
+      labOffer = wrap.querySelector('.offer');
+      labOffer.dataset.originalTerms = labOffer.querySelector('.fine-text').textContent;
+      document.getElementById('lab-message').textContent = '';
+      applyLab();
+    }
+    function applyLab() {
+      if (!labOffer) return;
+      const get = (id) => document.getElementById(id);
+      const fixes = {
+        balance: get('fix-balance').checked,
+        price: get('fix-price').checked,
+        addon: get('fix-addon').checked,
+        wording: document.querySelector('input[name="fix-wording"]:checked').value !== 'shame',
+        timer: get('fix-timer').checked,
+        terms: Number(get('fix-terms').value) === 2
+      };
+      labOffer.classList.toggle('fix-balance', fixes.balance);
+      labOffer.classList.toggle('fix-price', fixes.price);
+      labOffer.classList.toggle('fix-addon', fixes.addon);
+      labOffer.classList.toggle('fix-timer', fixes.timer);
+      labOffer.querySelector('.addon-box').checked = !fixes.addon;
+      labOffer.querySelector('.free').innerHTML = fixes.price ? 'Free for 7 days.' : 'At <strong>no</strong> cost.';
+      labOffer.querySelector('.offer-cta').firstChild.textContent = fixes.price ? 'Start my 7-day free trial' : 'Start my FREE trial';
+      labOffer.querySelector('.decline-text').textContent = WORDING[document.querySelector('input[name="fix-wording"]:checked').value];
+      const termsLevel = Number(get('fix-terms').value);
+      labOffer.dataset.terms = termsLevel;
+      get('fix-terms').setAttribute('aria-valuetext', ['Tiny', 'Small', 'Acceptable'][termsLevel]);
+      labOffer.querySelector('.fine-text').textContent = termsLevel === 2 ? HONEST_TERMS : labOffer.dataset.originalTerms;
+
+      const count = Object.values(fixes).filter(Boolean).length;
+      document.querySelectorAll('.lab-row[data-fix]').forEach((row) => row.classList.toggle('is-fixed', fixes[row.dataset.fix]));
+      const clarity = count / 6;
+      document.getElementById('lab-preview').style.setProperty('--clarity', clarity);
+      document.querySelector('.gauge').style.setProperty('--clarity', clarity);
+      document.getElementById('gauge-count').textContent = `${count} of 6 fixed`;
+      const file = document.getElementById('file-report');
+      file.setAttribute('aria-disabled', count === 6 ? 'false' : 'true');
+      if (count === 6) document.getElementById('lab-message').textContent = 'You cleared the waters! The offer went from murky and deceptive to clear and honest!';
+      else document.getElementById('lab-message').textContent = '';
+    }
+    document.querySelectorAll('#fix-balance, #fix-price, #fix-addon, #fix-timer, #fix-terms, input[name="fix-wording"]').forEach((el) => {
+      el.addEventListener('input', applyLab);
+      el.addEventListener('change', applyLab);
+    });
+    document.getElementById('file-report').addEventListener('click', (e) => {
+      if (e.currentTarget.getAttribute('aria-disabled') === 'true') {
+        const left = 6 - document.querySelectorAll('.lab-row.is-fixed').length;
+        document.getElementById('lab-message').textContent = `Fix ${left} more ${left === 1 ? 'problem' : 'problems'} before filing the report.`;
+        return;
+      }
+      returnToCard();
+    });
+
+
+    /* Switch screens with no fades of their own, for use underneath the fade to black */
+    function goInstant(name) {
+      dive.classList.add('no-anim');
+      go(name);
+      const target = name === 'lure' ? 'reveal' : name;
+      screens.forEach((s) => s.classList.toggle('is-in', s.dataset.stage === target));
+      requestAnimationFrame(() => requestAnimationFrame(() => dive.classList.remove('no-anim')));
+    }
+
+    /* Entering and leaving, always through a fade to black */
+    function showDive(on) {
+      setTimeout(() => document.dispatchEvent(new CustomEvent('lure:dive', { detail: on })), 0);
+      dive.classList.add('no-anim');
+      dive.classList.toggle('is-active', on);
+      if (!on) { dive.classList.remove('is-lit'); dive.dataset.bg = 'none'; }
+      dive.inert = !on;
+      dive.setAttribute('aria-hidden', on ? 'false' : 'true');
+      if (!on) screens.forEach((s) => { s.hidden = true; s.classList.remove('is-in'); });
+      requestAnimationFrame(() => requestAnimationFrame(() => dive.classList.remove('no-anim')));
+    }
+    function resetLab() {
+      ['fix-balance', 'fix-price', 'fix-addon', 'fix-timer'].forEach((id) => { document.getElementById(id).checked = false; });
+      document.querySelector('input[name="fix-wording"][value="shame"]').checked = true;
+      document.getElementById('fix-terms').value = 0;
+    }
+    function enter() {
+      clearTimers();
+      resetLab();
+      fadeThrough(() => {
+        caseView.className = 'case-view';
+        caseView.inert = true;
+        stage.inert = true;
+        showDive(true);
+        goInstant('lure');
+        dive.dataset.bg = 'none';
+        /* Once the black lifts, the lure's light slowly glows up out of the dark */
+        setTimeout(() => {
+          dive.classList.remove('no-anim');
+          dive.classList.add('slow-glow');
+          void dive.offsetWidth;
+          dive.dataset.bg = 'dark';
+        }, 150);
+        setTimeout(() => dive.classList.remove('slow-glow'), 1600);
+      });
+    }
+    function surface() {
+      clearTimers();
+      stopClock();
+      fadeThrough(() => {
+        showDive(false);
+        caseView.className = 'case-view';
+        caseView.inert = true;
+        document.body.classList.remove('case-open');
+        stage.inert = false;
+        deskFolder.focus({ preventScroll: true });
+      });
+    }
+    function returnToCard() {
+      clearTimers();
+      fadeThrough(() => {
+        showDive(false);
+        showCardState();
+        cardImg.src = CARD_NO_X;
+        cardImg.alt = 'Case card for the anglerfish. Status: being updated.';
+        caseView.classList.add('no-anim');
+        caseView.className = 'case-view no-anim is-active is-entered is-card-ready is-card-up is-folder-away is-settled';
+        caseView.inert = false;
+        requestAnimationFrame(() => requestAnimationFrame(() => { caseView.classList.remove('no-anim'); fitNotes(); }));
+      }, () => setTimeout(slamCheck, 250));
+    }
+
+    function markResolved() {
+      root.dataset.case1 = 'resolved';
+      try {
+        const p = JSON.parse(localStorage.getItem('lure-progress') || '{}');
+        p.case1 = 'resolved';
+        localStorage.setItem('lure-progress', JSON.stringify(p));
+      } catch (e) {}
+      deskFolder.dataset.tip = 'Take another dive?';
+    }
+
+    /* Completion: the card returns with its X gone, then a green check slams down onto it */
+    function slamCheck() {
+      markResolved();
+      const quick = Settings.reducedMotion();
+      const card = caseView.querySelector('.card');
+      const doneImg = new Image();
+      doneImg.src = CARD_DONE;
+      const showButton = () => setTimeout(() => {
+        researchLabel.textContent = 'Research Again';
+        researchBtn.dataset.tip = 'Take another dive?';
+        caseView.classList.add('is-research');
+        researchBtn.focus({ preventScroll: true });
+      }, quick ? 0 : 650);
+
+      const check = document.createElement('img');
+      check.className = 'slam-check';
+      check.src = 'assets/check.png';
+      check.alt = '';
+      card.append(check);
+
+      const land = () => {
+        /* The completed card dissolves in quickly on top; the check stays put above it,
+           and the paper is identical, so only the portrait visibly changes */
+        const over = new Image();
+        over.className = 'card-over';
+        over.alt = '';
+        over.src = CARD_DONE;
+        cardImg.after(over);
+        requestAnimationFrame(() => over.classList.add('is-in'));
+        setTimeout(() => {
+          showCardState();
+          researchLabel.textContent = caseView.classList.contains('is-research') ? 'Research Again' : 'Research';
+          over.remove();
+          check.remove();
+        }, quick ? 0 : 380);
+        if (!quick) {
+          burst(card);
+          card.classList.add('is-hit');
+          setTimeout(() => card.classList.remove('is-hit'), 300);
+        }
+        showButton();
+      };
+      const go = () => {
+        if (quick) { check.classList.add('is-fade'); setTimeout(land, 350); return; }
+        check.classList.add('is-slam');
+        setTimeout(land, 330);
+      };
+      if (doneImg.complete) go(); else { doneImg.onload = go; doneImg.onerror = go; }
+    }
+
+    /* Green flecks burst out from the check, then fade */
+    function burst(card) {
+      const box = document.createElement('div');
+      box.className = 'burst';
+      const cw = card.getBoundingClientRect().width;
+      for (let i = 0; i < 26; i++) {
+        const p = document.createElement('span');
+        const angle = Math.random() * Math.PI * 2;
+        const dist = cw * (0.05 + Math.random() * 0.11);
+        const size = cw * (0.006 + Math.random() * 0.011);
+        p.style.setProperty('--dx', `${Math.cos(angle) * dist}px`);
+        p.style.setProperty('--dy', `${Math.sin(angle) * dist}px`);
+        p.style.width = p.style.height = `${size}px`;
+        p.style.animationDelay = `${Math.random() * 60}ms`;
+        p.style.animationDuration = `${560 + Math.random() * 360}ms`;
+        box.append(p);
+      }
+      card.append(box);
+      setTimeout(() => box.remove(), 1200);
+    }
+
+    document.getElementById('to-lab').addEventListener('click', () => fadeThrough(() => goInstant('lab')));
+    document.getElementById('surface-btn').addEventListener('click', surface);
+    return { enter, surface, isActive: () => dive.classList.contains('is-active') };
+  })();
+
+  try {
+    if (JSON.parse(localStorage.getItem('lure-progress') || '{}').case1 === 'resolved') {
+      root.dataset.case1 = 'resolved';
+      deskFolder.dataset.tip = 'Take another dive?';
+    }
+  } catch (e) {}
+
+  /* Clicking the pinned offer on the reveal explains that it's only a snapshot */
+  (() => {
+    const slot = document.querySelector('.reveal-slot');
+    const note = document.getElementById('snapshot-note');
+    let hideTimer = null;
+    slot.addEventListener('click', () => {
+      const wrap = slot.querySelector('.offer-wrap');
+      if (!wrap || !wrap.inert || !wrap.querySelector('.offer.inspect')) return;
+      note.textContent = "This is just a snapshot of the offer. Use the button below to keep investigating.";
+      note.classList.add('is-on');
+      const btn = [...document.querySelectorAll('#reveal-next, #to-lab')].find((b) => !b.hidden);
+      if (btn && !Settings.reducedMotion()) {
+        btn.classList.remove('is-nudge');
+        void btn.offsetWidth;
+        btn.classList.add('is-nudge');
+      }
+      clearTimeout(hideTimer);
+      hideTimer = setTimeout(() => note.classList.remove('is-on'), 1000);
+    });
+  })();
+
+  /* Enter toggles checkboxes and picks radio options too, not only Space */
+  document.addEventListener('keydown', (e) => {
+    const t = e.target;
+    if (e.key !== 'Enter' || !(t instanceof HTMLInputElement)) return;
+    if ((t.type === 'checkbox' && !panel.contains(t)) || t.type === 'radio') {
+      e.preventDefault();
+      t.click();
+    }
+  });
+
+  /* ---------- Bubbles and particles under the sea (anglerfish and Redesign Lab) ---------- */
+  (() => {
+    const dive = document.getElementById('dive');
+    const canvas = dive.querySelector('.dive-particles');
+    const ctx = canvas.getContext('2d');
+    const bubbleImg = new Image();
+    bubbleImg.src = 'assets/bubble.png';
+    /* lit = the anglerfish (slow and faint); lab = the Redesign Lab (a little busier than the desk) */
+    const MOODS = {
+      lit: { density: 42000, speck: [0.035, 0.08], sway: 0.12, swayT: 3600, size: [14, 18], bubbleV: [0.18, 0.17], wobbleT: 1800, alpha: [0.14, 0.12], every: [1000, 1800], max: 9, seed: 6 },
+      lab: { density: 24000, speck: [0.08, 0.22], sway: 0.3, swayT: 2400, size: [9, 13], bubbleV: [0.45, 0.45], wobbleT: 900, alpha: [0.35, 0.2], every: [550, 1250], max: 14, seed: 8 }
+    };
+    let mood = null, M = MOODS.lit;
+    let w = 0, h = 0, specks = [], bubbles = [], nextBubble = 0, running = false;
+    const active = () => dive.classList.contains('is-active') && MOODS[dive.dataset.bg] && !Settings.reducedEffects();
+
+    function build() {
+      const dpr = Math.min(window.devicePixelRatio || 1, 2);
+      w = window.innerWidth; h = window.innerHeight;
+      canvas.width = w * dpr; canvas.height = h * dpr;
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      specks = Array.from({ length: Math.round((w * h) / M.density) }, () => ({
+        x: Math.random() * w, y: Math.random() * h,
+        r: 0.6 + Math.random() * 1.8, a: 0.08 + Math.random() * 0.3,
+        vy: M.speck[0] + Math.random() * M.speck[1], phase: Math.random() * Math.PI * 2, sway: 0.2 + Math.random() * 0.5
+      }));
+      seed(performance.now());
+    }
+    function spawnBubble(t, y) {
+      const size = M.size[0] + Math.random() * M.size[1];
+      bubbles.push({
+        x: w * (0.04 + Math.random() * 0.92), y: y ?? h + size, startY: h + size, size,
+        vy: M.bubbleV[0] + Math.random() * M.bubbleV[1], wobble: 6 + Math.random() * 10,
+        phase: Math.random() * Math.PI * 2, a: M.alpha[0] + Math.random() * M.alpha[1]
+      });
+      nextBubble = t + M.every[0] + Math.random() * M.every[1];
+    }
+    /* Scatter bubbles over the whole screen so the scene looks like it was already going */
+    function seed(t) {
+      bubbles = [];
+      for (let i = 0; i < M.seed; i++) spawnBubble(t, h * (0.1 + Math.random() * 0.95));
+      nextBubble = t + 300;
+    }
+    function draw(t, move) {
+      ctx.clearRect(0, 0, w, h);
+      for (const f of specks) {
+        if (move) {
+          f.y -= f.vy;
+          f.x += Math.sin(t / M.swayT + f.phase) * f.sway * M.sway;
+          if (f.y < -4) { f.y = h + 4; f.x = Math.random() * w; }
+        }
+        ctx.beginPath();
+        ctx.arc(f.x, f.y, f.r, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(200, 235, 230, ${f.a})`;
+        ctx.fill();
+      }
+      if (!move) return;
+      if (t > nextBubble && bubbles.length < M.max) spawnBubble(t);
+      if (!bubbleImg.complete) return;
+      for (const b of bubbles) {
+        b.y -= b.vy;
+        const rise = (b.startY - b.y) / b.startY;
+        const size = b.size * (1 + rise * 0.3);
+        const fade = Math.min(1, Math.max(0, b.y / (h * 0.3)));
+        ctx.globalAlpha = b.a * fade;
+        ctx.drawImage(bubbleImg, b.x + Math.sin(t / M.wobbleT + b.phase) * b.wobble - size / 2, b.y - size / 2, size, size);
+      }
+      ctx.globalAlpha = 1;
+      bubbles = bubbles.filter((b) => b.y > -40);
+    }
+    function loop(t) {
+      if (!active()) { running = false; ctx.clearRect(0, 0, w, h); return; }
+      if (Settings.reducedMotion()) { draw(t, false); running = false; return; }
+      draw(t, true);
+      requestAnimationFrame(loop);
+    }
+    function update() {
+      const now = dive.dataset.bg;
+      if (MOODS[now] && now !== mood) { mood = now; M = MOODS[now]; build(); }
+      if (!MOODS[now]) mood = null;
+      if (running || !active()) return;
+      running = true;
+      requestAnimationFrame(loop);
+    }
+    window.addEventListener('resize', () => { if (mood) build(); });
+    document.addEventListener('lure:dive', update);
+    document.addEventListener('lure:settings', update);
+    new MutationObserver(update).observe(dive, { attributes: true, attributeFilter: ['data-bg', 'class'] });
+  })();
+
+  /* ---------- Fish swimming across the Redesign Lab in small groups ---------- */
+  (() => {
+    const dive = document.getElementById('dive');
+    const layer = dive.querySelector('.fish-layer');
+    const KINDS = [
+      { src: 'assets/fish-tang.png', ratio: 73 / 128 },
+      { src: 'assets/fish-blue.png', ratio: 63 / 151 }
+    ];
+    let timer = null;
+    const on = () => dive.classList.contains('is-active') && dive.dataset.bg === 'lab' && !Settings.reducedMotion() && !Settings.reducedEffects();
+    const rand = (a, b) => a + Math.random() * (b - a);
+
+    function swim(kind, toRight, y, size, delay, duration, depth) {
+      const el = document.createElement('div');
+      el.className = 'fish' + (toRight ? '' : ' flip');
+      el.style.width = `${size}px`;
+      el.style.opacity = depth;
+      el.style.filter = depth < 0.8 ? 'blur(0.6px) saturate(0.8)' : '';
+      const img = new Image();
+      img.src = kind.src;
+      img.alt = '';
+      img.style.setProperty('--bob', `${rand(2.2, 3.2).toFixed(2)}s`);
+      img.style.animationDelay = `-${rand(0, 3).toFixed(2)}s`;
+      el.append(img);
+      layer.append(el);
+      const w = window.innerWidth;
+      const from = toRight ? -size - 40 : w + 40;
+      const to = toRight ? w + 40 : -size - 40;
+      const drift = rand(-40, 40);
+      const anim = el.animate(
+        [{ transform: `translate(${from}px, ${y}px)` }, { transform: `translate(${to}px, ${y + drift}px)` }],
+        { duration, delay, easing: 'linear', fill: 'both' }
+      );
+      anim.onfinish = () => el.remove();
+    }
+    function spawnGroup() {
+      const kind = KINDS[Math.floor(Math.random() * KINDS.length)];
+      const count = 1 + Math.floor(Math.random() * 3);
+      const toRight = Math.random() < 0.5;
+      const h = window.innerHeight;
+      const baseY = rand(0.12, 0.78) * h;
+      const depth = Math.random() < 0.35 ? rand(0.45, 0.65) : rand(0.85, 1);
+      const baseSize = (depth < 0.8 ? rand(40, 55) : rand(60, 85)) * Math.min(1.4, Math.max(0.8, h / 900));
+      const duration = rand(17000, 26000) * (depth < 0.8 ? 1.3 : 1);
+      for (let i = 0; i < count; i++) {
+        const size = baseSize * rand(0.85, 1.1);
+        swim(kind, toRight, baseY + rand(-45, 45), size, i * rand(500, 1300), duration * rand(0.95, 1.05), depth);
+      }
+    }
+    function schedule(first) {
+      clearTimeout(timer);
+      if (!on()) { layer.replaceChildren(); return; }
+      timer = setTimeout(() => {
+        if (!on()) { layer.replaceChildren(); return; }
+        spawnGroup();
+        schedule(false);
+      }, first ? 900 : rand(4500, 9000));
+    }
+    let wasOn = false;
+    function update() {
+      const now = on();
+      if (now && !wasOn) schedule(true);
+      if (!now) { clearTimeout(timer); layer.replaceChildren(); }
+      wasOn = now;
+    }
+    document.addEventListener('lure:settings', update);
+    new MutationObserver(update).observe(dive, { attributes: true, attributeFilter: ['data-bg', 'class'] });
+  })();
+
+  /* ---------- Marine snow ---------- */
+  (() => {
+    const canvas = document.querySelector('.snow');
+    const ctx = canvas.getContext('2d');
+    let w = 0, h = 0, flakes = [], running = false;
+    /* Bubbles: a few at a time, rising from behind the desk, wobbling and growing a little as they rise */
+    const bubbleImg = new Image();
+    bubbleImg.src = 'assets/bubble.png';
+    let bubbles = [], nextBubble = 0;
+    function spawnBubble(t) {
+      const size = 9 + Math.random() * 13;
+      /* Start just behind the desk's top edge so bubbles seem to rise from behind it */
+      const st = document.querySelector('.stage').getBoundingClientRect();
+      const deskTop = st.top + st.height * (480 / 900 + 0.06);
+      const startY = Math.min(h + size, deskTop + size + 10);
+      bubbles.push({
+        x: w * (0.08 + Math.random() * 0.84),
+        y: startY,
+        size,
+        vy: 0.45 + Math.random() * 0.45,
+        wobble: 5 + Math.random() * 9,
+        phase: Math.random() * Math.PI * 2,
+        a: 0.35 + Math.random() * 0.2,
+        startY
+      });
+      nextBubble = t + 700 + Math.random() * 1600;
+    }
+
+    function resize() {
+      const dpr = Math.min(window.devicePixelRatio || 1, 2);
+      w = canvas.clientWidth; h = canvas.clientHeight;
+      canvas.width = w * dpr; canvas.height = h * dpr;
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      const count = Math.round((w * h) / 30000);
+      flakes = Array.from({ length: count }, () => ({
+        x: Math.random() * w,
+        y: Math.random() * h,
+        r: 0.6 + Math.random() * 1.8,
+        a: 0.08 + Math.random() * 0.3,
+        vy: 0.08 + Math.random() * 0.22,
+        phase: Math.random() * Math.PI * 2,
+        sway: 0.2 + Math.random() * 0.5
+      }));
+      render(performance.now(), false);
+    }
+
+    function render(t, move) {
+      ctx.clearRect(0, 0, w, h);
+      for (const f of flakes) {
+        if (move) {
+          f.y -= f.vy;
+          f.x += Math.sin(t / 2400 + f.phase) * f.sway * 0.3;
+          if (f.y < -4) { f.y = h + 4; f.x = Math.random() * w; }
+        }
+        ctx.beginPath();
+        ctx.arc(f.x, f.y, f.r, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(200, 235, 230, ${f.a})`;
+        ctx.fill();
+      }
+      if (!move) return;
+      if (t > nextBubble && bubbles.length < 12) spawnBubble(t);
+      if (!bubbleImg.complete) return;
+      for (const b of bubbles) {
+        b.y -= b.vy;
+        const rise = (b.startY - b.y) / b.startY;
+        const size = b.size * (1 + rise * 0.3);
+        const fade = Math.min(1, Math.max(0, b.y / (h * 0.3)));
+        const x = b.x + Math.sin(t / 900 + b.phase) * b.wobble;
+        ctx.globalAlpha = b.a * fade;
+        ctx.drawImage(bubbleImg, x - size / 2, b.y - size / 2, size, size);
+      }
+      ctx.globalAlpha = 1;
+      bubbles = bubbles.filter((b) => b.y > -30);
+    }
+
+    function loop(t) {
+      if (Settings.reducedMotion() || Settings.reducedEffects()) { running = false; return; }
+      render(t, true);
+      requestAnimationFrame(loop);
+    }
+    function start() {
+      if (running || Settings.reducedMotion() || Settings.reducedEffects()) return;
+      running = true;
+      requestAnimationFrame(loop);
+    }
+
+    resize();
+    start();
+    window.addEventListener('resize', resize);
+    /* The canvas has no size while effects are off, so measure it again whenever a setting changes */
+    document.addEventListener('lure:settings', () => { resize(); start(); });
+  })();
+</script>
+
+</body>
+</html>
