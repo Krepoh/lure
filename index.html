@@ -49,8 +49,8 @@
     --sea-muted: #A9C7CB;
     --sea-accent: #63B9B0;
     --track-off: #14303F;
-    --wobble: 14px 20px 12px 22px / 20px 12px 22px 14px;
-    --wobble-sm: 8px 11px 7px 12px / 11px 7px 12px 8px;
+    --wobble: 16px;
+    --wobble-sm: 10px;
     --ease-gear: cubic-bezier(0.65, 0, 0.35, 1);
     --stage-w: clamp(100vw, 160vh, 125vw);
     --desk-drop: 6%;
@@ -329,7 +329,7 @@
     height: 1.65rem;
     margin: 0;
     border: 2px solid var(--ink-line);
-    border-radius: 14px 16px 15px 13px / 13px 15px 16px 14px;
+    border-radius: 999px;
     background: var(--track-off);
     cursor: pointer;
     transition: background 0.25s ease;
@@ -341,7 +341,7 @@
     left: 0.18rem;
     width: 1.1rem;
     height: 1.1rem;
-    border-radius: 52% 48% 50% 46%;
+    border-radius: 50%;
     background: var(--sea-muted);
     transform: translateY(-50%);
     transition: transform 0.25s var(--ease-gear), background 0.25s ease;
@@ -354,7 +354,7 @@
   .panel-done {
     padding: 0.25rem 1.4rem 0.35rem;
     border: 2px solid var(--ink-line);
-    border-radius: var(--wobble-sm);
+    border-radius: 10px;
     background: var(--sea-raised);
     color: var(--sea-text);
     font-family: var(--font-ui);
@@ -469,7 +469,7 @@
     gap: 0.6rem;
     padding: 0.35rem 2.8rem 0.55rem 2.2rem;
     border: 2.5px solid var(--ink-line);
-    border-radius: var(--wobble);
+    border-radius: 16px;
     background: var(--sea-panel);
     color: var(--lure-hex);
     font-family: var(--font-ui);
@@ -499,7 +499,7 @@
     gap: 0.4rem;
     padding: 0.2rem 1rem 0.3rem 0.75rem;
     border: 2px solid var(--ink-line);
-    border-radius: var(--wobble-sm);
+    border-radius: 10px;
     background: var(--sea-panel);
     color: var(--sea-text);
     font-family: var(--font-ui);
@@ -526,7 +526,7 @@
     gap: 0.5rem;
     padding: 0.25rem 1.3rem 0.35rem;
     border: 2.5px solid var(--ink-line);
-    border-radius: var(--wobble-sm);
+    border-radius: 10px;
     background: var(--sea-panel);
     color: var(--sea-text);
     font-family: var(--font-ui);
@@ -542,7 +542,7 @@
   .hb svg { width: 1.15em; height: 1.15em; flex: none; }
   .hb-primary {
     padding: 0.35rem 2rem 0.5rem;
-    border-radius: var(--wobble);
+    border-radius: 16px;
     color: var(--lure-hex);
     font-size: 1.8rem;
     box-shadow: 0 4px 0 var(--ink-line), 0 12px 28px rgba(0, 0, 0, 0.45);
@@ -729,7 +729,7 @@
     height: 1.9rem;
     place-items: center;
     border: 2.5px solid var(--ink-line);
-    border-radius: 52% 48% 50% 46%;
+    border-radius: 50%;
     background: #FFD86B;
     color: #24323F;
     font-family: var(--font-ui);
@@ -784,7 +784,7 @@
   .tricks li { display: grid; grid-template-columns: auto 1fr; gap: 0.75rem; align-items: start; padding: 0.45rem 0.5rem; border-radius: var(--wobble-sm); cursor: default; }
   .tricks li:hover, .tricks li:focus-visible { background: rgba(255, 216, 107, 0.08); outline: none; }
   .tricks li:focus-visible { box-shadow: inset 0 0 0 2px var(--lure-hex); }
-  .tricks .num { display: grid; place-items: center; width: 1.8rem; height: 1.8rem; border: 2.5px solid var(--ink-line); border-radius: 52% 48% 50% 46%; background: #FFD86B; color: #24323F; font-size: 1.1rem; }
+  .tricks .num { display: grid; place-items: center; width: 1.8rem; height: 1.8rem; border: 2.5px solid var(--ink-line); border-radius: 50%; background: #FFD86B; color: #24323F; font-size: 1.1rem; }
   .tricks b { display: block; font-weight: 400; font-size: 1.3rem; line-height: 1.15; }
   .tricks span.why { display: block; font-size: 1.05rem; line-height: 1.35; color: var(--sea-muted); }
   .tricks .spotted { color: var(--sea-accent); }
@@ -819,14 +819,14 @@
   html[data-font="clear"] .lab-row label, html[data-font="clear"] .lab-row legend { font-size: 1rem; font-weight: 700; }
   html[data-font="clear"] .lab-row .hint-text { font-size: 0.88rem; }
   fieldset.lab-row { margin: 0; border: 0; min-width: 0; }
-  .choices { display: flex; flex-wrap: wrap; gap: 0.45rem; }
+  .choices { display: flex; flex-wrap: wrap; gap: 0.45rem; margin-top: 0.4rem; }
   .choice { position: relative; }
   .choice input { position: absolute; opacity: 0; width: 1px; height: 1px; }
   .choice span {
     display: inline-block;
     padding: 0.2rem 0.75rem 0.3rem;
     border: 2px solid var(--ink-line);
-    border-radius: var(--wobble-sm);
+    border-radius: 10px;
     background: var(--track-off);
     color: var(--sea-muted);
     font-size: 1.05rem;
@@ -837,16 +837,16 @@
   .choice input:focus-visible + span { outline: 2px solid var(--lure-hex); outline-offset: 2px; }
   html[data-font="clear"] .choice span { font-size: 0.9rem; }
   .terms-range { width: 100%; margin: 0.2rem 0 0; appearance: none; -webkit-appearance: none; height: 1.6rem; background: none; cursor: pointer; }
-  .terms-range::-webkit-slider-runnable-track { height: 0.55rem; border: 2px solid var(--ink-line); border-radius: 8px 10px 9px 7px; background: var(--track-off); }
-  .terms-range::-moz-range-track { height: 0.55rem; border: 2px solid var(--ink-line); border-radius: 8px 10px 9px 7px; background: var(--track-off); }
-  .terms-range::-webkit-slider-thumb { -webkit-appearance: none; width: 1.3rem; height: 1.3rem; margin-top: -0.5rem; border: 2px solid var(--ink-line); border-radius: 52% 48% 50% 46%; background: var(--sea-text); }
-  .terms-range::-moz-range-thumb { width: 1.3rem; height: 1.3rem; border: 2px solid var(--ink-line); border-radius: 52% 48% 50% 46%; background: var(--sea-text); }
+  .terms-range::-webkit-slider-runnable-track { height: 0.55rem; border: 2px solid var(--ink-line); border-radius: 999px; background: var(--track-off); }
+  .terms-range::-moz-range-track { height: 0.55rem; border: 2px solid var(--ink-line); border-radius: 999px; background: var(--track-off); }
+  .terms-range::-webkit-slider-thumb { -webkit-appearance: none; width: 1.3rem; height: 1.3rem; margin-top: -0.5rem; border: 2px solid var(--ink-line); border-radius: 50%; background: var(--sea-text); }
+  .terms-range::-moz-range-thumb { width: 1.3rem; height: 1.3rem; border: 2px solid var(--ink-line); border-radius: 50%; background: var(--sea-text); }
   .terms-range:focus-visible { outline: 2px solid var(--lure-hex); outline-offset: 4px; border-radius: 6px; }
   .range-labels { display: flex; justify-content: space-between; font-size: 0.95rem; color: var(--sea-muted); }
   .gauge-row { margin-top: 0.9rem; }
   .gauge-head { display: flex; justify-content: space-between; align-items: baseline; font-size: 1.2rem; }
   .gauge-head span { color: var(--sea-muted); font-size: 1.05rem; font-variant-numeric: tabular-nums; }
-  .gauge { height: 0.9rem; margin-top: 0.3rem; border: 2.5px solid var(--ink-line); border-radius: 10px 12px 11px 9px / 9px 11px 12px 10px; background: var(--track-off); overflow: hidden; }
+  .gauge { height: 0.9rem; margin-top: 0.3rem; border: 2.5px solid var(--ink-line); border-radius: 999px; background: var(--track-off); overflow: hidden; }
   .gauge-fill { height: 100%; width: calc(var(--clarity, 0) * 100%); background: var(--sea-accent); transition: width 0.5s var(--ease-gear); }
   .lab-message { min-height: 1.4em; margin: 0.6rem 0 0; font-size: 1.05rem; color: #FFD86B; text-align: center; }
   .lab-file { margin-top: 0.4rem; width: 100%; }
@@ -862,7 +862,7 @@
     top: 74%;
     padding: 0.05em 0.35em 0.12em;
     border: 0.12em solid #15707A;
-    border-radius: 6px 9px 5px 10px;
+    border-radius: 8px;
     color: #15707A;
     font-family: "Patrick Hand", var(--font-hand);
     font-size: calc(var(--card-w) * 0.052);
@@ -991,7 +991,6 @@
     color: #0B2027;
     font-size: 0.95rem;
     line-height: 1.2;
-    transform: rotate(3deg);
     white-space: nowrap;
   }
   .reveal-layout .tricks li {
@@ -1017,48 +1016,52 @@
 
   /* The one big "go" button per screen: filled with the lure color and breathing like the folder */
   .hb-go {
-    padding: 0.4rem 2.2rem 0.55rem;
-    border: 3px solid var(--ink-line);
-    border-radius: var(--wobble);
+    /* No outline: the glow sits right against the fill. Locked and high-contrast versions add a ring via --go-ring */
+    padding: calc(0.4rem + 2px) calc(2.2rem + 2px) calc(0.55rem + 2px);
+    border: 0;
+    --go-ring: transparent;
+    --go-ledge: #13675F;
+    border-radius: 16px;
     background: var(--lure-hex);
     color: #062229;
     font-size: 2rem;
     position: relative;
     isolation: isolate;
-    box-shadow: 0 5px 0 var(--ink-line);
+    box-shadow: inset 0 0 0 2px var(--go-ring), 0 5px 0 var(--go-ledge);
   }
   .hb-go::after {
     content: "";
     position: absolute;
-    inset: -3px;
+    inset: 1px;
     z-index: -1;
     border-radius: inherit;
-    box-shadow: 0 0 34px 10px rgba(var(--lure), 0.6);
+    box-shadow: 0 0 34px 11px rgba(var(--lure), 0.6);
     animation: go-glow 2.8s ease-in-out infinite;
     pointer-events: none;
   }
   .hb-go:hover { background: #8AF0E2; }
-  .hb-go:active { transform: translateY(3px); box-shadow: 0 2px 0 var(--ink-line); }
+  .hb-go:active { transform: translateY(3px); box-shadow: inset 0 0 0 2px var(--go-ring), 0 2px 0 var(--go-ledge); }
   .hb-go:focus-visible { outline: 3px solid #FFFFFF; outline-offset: 4px; }
   .hb-go svg { width: 1.1em; height: 1.1em; }
   @keyframes go-glow { 0%, 100% { opacity: 0.4; } 50% { opacity: 1; } }
-  .hb-go[aria-disabled="true"] { background: var(--sea-panel); color: var(--sea-muted); box-shadow: 0 5px 0 var(--ink-line); opacity: 0.7; }
+  .hb-go[aria-disabled="true"] { --go-ring: var(--ink-line); --go-ledge: var(--ink-line); background: var(--sea-panel); color: var(--sea-muted); box-shadow: inset 0 0 0 2px var(--go-ring), 0 5px 0 var(--go-ledge); opacity: 0.7; }
+  .hb-go[aria-disabled="true"]:active { transform: none; box-shadow: inset 0 0 0 2px var(--go-ring), 0 5px 0 var(--go-ledge); }
   .hb-go[aria-disabled="true"]::after { display: none; }
   .hb-go[aria-disabled="true"]:hover { background: var(--sea-panel); }
   html[data-font="clear"] .hb-go { font-size: 1.45rem; font-weight: 700; }
   html[data-motion="reduce"] .hb-go::after { animation: none; opacity: 0.8; }
-  html[data-effects="reduce"] .hb-go { background: var(--lure-hex); border-color: #FFFFFF; box-shadow: 0 5px 0 #FFFFFF; }
+  html[data-effects="reduce"] .hb-go { --go-ring: #FFFFFF; --go-ledge: #FFFFFF; background: var(--lure-hex); box-shadow: inset 0 0 0 2px var(--go-ring), 0 5px 0 var(--go-ledge); }
   html[data-effects="reduce"] .hb-go::after { display: none; }
-  html[data-effects="reduce"] .hb-go[aria-disabled="true"] { background: #06131B; color: #E2F0F0; border-color: var(--lure-hex); }
+  html[data-effects="reduce"] .hb-go[aria-disabled="true"] { --go-ring: var(--lure-hex); background: #06131B; color: #E2F0F0; }
 
-  .hb-go-sm { padding: 0.35rem 1.8rem 0.5rem; font-size: 1.65rem; }
+  .hb-go-sm { padding: calc(0.35rem + 2px) calc(1.8rem + 2px) calc(0.5rem + 2px); font-size: 1.65rem; }
   html[data-font="clear"] .hb-go-sm { font-size: 1.25rem; }
 
   /* A strong but secondary action: cyan outline and text on the dark panel, with a steady glow */
   .hb-lead {
     padding: 0.35rem 1.8rem 0.5rem;
     border: 3px solid var(--lure-hex);
-    border-radius: var(--wobble);
+    border-radius: 16px;
     color: var(--lure-hex);
     font-size: 1.65rem;
     box-shadow: 0 4px 0 var(--ink-line), 0 0 18px 2px rgba(var(--lure), 0.35);
@@ -1074,7 +1077,8 @@
   html[data-font="clear"] .reveal-count { font-size: 1.05rem; }
   .reveal-layout .tricks li { opacity: 0; visibility: hidden; transform: translateY(10px); transition: opacity 0.45s ease, transform 0.45s var(--ease-gear), visibility 0s linear 0.45s, background 0.2s ease; }
   .reveal-layout .tricks li.is-shown { opacity: 1; visibility: visible; transform: none; transition: opacity 0.45s ease, transform 0.45s var(--ease-gear), visibility 0s, background 0.2s ease; }
-  .reveal-layout .tricks li.is-current { background: var(--sea-raised); box-shadow: 0 3px 0 var(--ink-line), 0 0 0 3px rgba(255, 216, 107, 0.55); }
+  /* The yellow ring wraps the card and its dark bottom edge: one ring around the card, one around the edge */
+  .reveal-layout .tricks li.is-current { background: var(--sea-raised); box-shadow: 0 3px 0 var(--ink-line), 0 3px 0 3px #A8955A, 0 0 0 3px #A8955A; }
   .offer.inspect .mark { display: none; }
   .offer.inspect .mark.is-shown { display: grid; animation: mark-pop 0.35s var(--ease-gear); }
   @keyframes mark-pop { from { scale: 0.4; opacity: 0; } to { scale: 1; opacity: 1; } }
@@ -1220,7 +1224,7 @@
     90% { transform: scale(0.88, 0.94); }
     100% { opacity: 1; transform: scale(1); }
   }
-  .card > .card-over { position: absolute; inset: 0; width: 100%; height: 100%; filter: drop-shadow(0 0 0 transparent); opacity: 0; transition: opacity 0.35s ease; }
+  .card > .card-over { position: absolute; left: 60.635%; top: 8.782%; width: 36.621%; height: 83.569%; max-width: none; filter: none; opacity: 0; transition: opacity 0.35s ease; }
   .card > .card-over.is-in { opacity: 1; }
   .card.is-hit { animation: card-hit 0.28s ease-out; }
   @keyframes card-hit {
@@ -1234,7 +1238,7 @@
     position: absolute;
     left: 0;
     top: 0;
-    border-radius: 52% 48% 50% 46%;
+    border-radius: 50%;
     background: #6FD47A;
     box-shadow: 0 0 6px rgba(111, 212, 122, 0.6);
     transform: translate(-50%, -50%);
@@ -1555,12 +1559,12 @@
 <section class="case-view" id="case-view" aria-labelledby="case-title" inert>
   <h2 class="sr-only" id="case-title">Case 001: Anglerfish</h2>
   <button class="back-btn" id="back-btn" type="button" data-tip="Close the file and return to the desk">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5.5 8.5 12.2l6.8 6.3"/></svg>
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5.5 8.5 12l6.5 6.5"/></svg>
     Desk
   </button>
   <img class="fold fold-tab" src="assets/folder-tab.png" alt="">
-  <button class="case-arrow prev" id="case-prev" type="button" aria-label="Previous case" data-tip="Previous case"><svg viewBox="0 0 60 60" aria-hidden="true"><path d="M17 8.5 C 30 15, 41 22, 52 29.5 C 41 37.5, 29 44, 17.5 51.5 C 15.5 37, 15 23, 17 8.5 Z"/></svg></button>
-  <button class="case-arrow next" id="case-next" type="button" aria-label="Next case" data-tip="Next case"><svg viewBox="0 0 60 60" aria-hidden="true"><path d="M17 8.5 C 30 15, 41 22, 52 29.5 C 41 37.5, 29 44, 17.5 51.5 C 15.5 37, 15 23, 17 8.5 Z"/></svg></button>
+  <button class="case-arrow prev" id="case-prev" type="button" aria-label="Previous case" data-tip="Previous case"><svg viewBox="0 0 60 60" aria-hidden="true"><path d="M17 8.5 C 30 15.5, 41 22.5, 52 30 C 41 37.5, 30 44.5, 17 51.5 C 15 37, 15 23, 17 8.5 Z"/></svg></button>
+  <button class="case-arrow next" id="case-next" type="button" aria-label="Next case" data-tip="Next case"><svg viewBox="0 0 60 60" aria-hidden="true"><path d="M17 8.5 C 30 15.5, 41 22.5, 52 30 C 41 37.5, 30 44.5, 17 51.5 C 15 37, 15 23, 17 8.5 Z"/></svg></button>
   <figure class="card" data-case="anglerfish">
     <img class="card-lock" src="assets/padlock.png" alt="">
     <img id="card-img" src="assets/card-anglerfish.png" alt="Case card for the anglerfish. Status: unresolved. Photograph: not available.">
@@ -1568,7 +1572,7 @@
   </figure>
   <img class="fold fold-front" src="assets/folder-screen.png" alt="">
   <button class="research-btn" id="research-btn" type="button" data-tip="Take a dive?">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10.3 3.6c3.7-.2 6.6 2.6 6.6 6.3 0 3.6-2.9 6.6-6.5 6.6-3.7 0-6.6-2.8-6.6-6.4 0-3.5 2.9-6.4 6.5-6.5z"/><path d="M15.4 15.3l5 5.2"/></svg>
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10.5 3.5a6.5 6.5 0 1 0 0 13a6.5 6.5 0 1 0 0-13z"/><path d="M15.3 15.3l5 5"/></svg>
     <span class="research-label">Research</span>
   </button>
 </section>
@@ -1648,7 +1652,7 @@
   <canvas class="dive-particles" aria-hidden="true"></canvas>
   <div class="dive-fader" id="dive-fader" aria-hidden="true"></div>
   <button class="hb surface-btn" id="surface-btn" type="button" data-tip="Desk">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 19.5V5.2M6 10.8l6-5.9 6.1 6"/></svg>
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 19.5V5M6 11l6-6 6 6"/></svg>
     Desk
   </button>
 
@@ -1676,12 +1680,12 @@
     <div style="--d:5.6s" class="fx screen-actions reveal-actions">
       <p class="reveal-count" id="reveal-count">This offer is hiding six tricks!</p>
       <button class="hb hb-go hb-go-sm" id="reveal-next" type="button">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10.3 3.6c3.7-.2 6.6 2.6 6.6 6.3 0 3.6-2.9 6.6-6.5 6.6-3.7 0-6.6-2.8-6.6-6.4 0-3.5 2.9-6.4 6.5-6.5z"/><path d="M15.4 15.3l5 5.2"/></svg>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10.5 3.5a6.5 6.5 0 1 0 0 13a6.5 6.5 0 1 0 0-13z"/><path d="M15.3 15.3l5 5"/></svg>
         <span class="reveal-next-label">Reveal the First Trick</span>
       </button>
       <button class="hb hb-go" id="to-lab" type="button" data-tip="Redesign the offer" hidden>
         Enter the Redesign Lab
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4.5 12.2h14.2M13 6.3l5.9 5.9-6 5.8"/></svg>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4.5 12h14M13 6l6 6-6 6"/></svg>
       </button>
       <p class="sr-only" id="reveal-live" aria-live="polite"></p>
     </div>
@@ -1902,7 +1906,7 @@
   let caseIndex = 0;
   const currentCase = () => CASES[caseIndex];
   /* Load every card image up front so flipping to one never shows it half-loaded */
-  const preloaded = ['assets/padlock.png', 'assets/card-anglerfish.png', 'assets/card-anglerfish-done.png', 'assets/card-anglerfish-nox.png', 'assets/check.png',
+  const preloaded = ['assets/portrait-anglerfish-done.png', 'assets/padlock.png', 'assets/card-anglerfish.png', 'assets/card-anglerfish-done.png', 'assets/card-anglerfish-nox.png', 'assets/check.png',
     ...CASES.filter((c) => c.src).map((c) => c.src)].map((src) => { const im = new Image(); im.src = src; return im; });
 
   function showCardState() {
@@ -2413,7 +2417,7 @@
         const over = new Image();
         over.className = 'card-over';
         over.alt = '';
-        over.src = CARD_DONE;
+        over.src = 'assets/portrait-anglerfish-done.png';
         cardImg.after(over);
         requestAnimationFrame(() => over.classList.add('is-in'));
         setTimeout(() => {
@@ -2598,7 +2602,8 @@
       { src: 'assets/fish-blue.png', ratio: 63 / 151 }
     ];
     let timer = null;
-    const on = () => dive.classList.contains('is-active') && dive.dataset.bg === 'lab' && !Settings.reducedMotion() && !Settings.reducedEffects();
+    /* No fish while the tab is hidden: the browser pauses their swimming but not the spawn timer, so they piled up off-screen */
+    const on = () => !document.hidden && dive.classList.contains('is-active') && dive.dataset.bg === 'lab' && !Settings.reducedMotion() && !Settings.reducedEffects();
     const rand = (a, b) => a + Math.random() * (b - a);
 
     function swim(kind, toRight, y, size, delay, duration, depth) {
@@ -2643,7 +2648,7 @@
       if (!on()) { layer.replaceChildren(); return; }
       timer = setTimeout(() => {
         if (!on()) { layer.replaceChildren(); return; }
-        spawnGroup();
+        if (layer.childElementCount < 10) spawnGroup();
         schedule(false);
       }, first ? 900 : rand(4500, 9000));
     }
@@ -2655,6 +2660,7 @@
       wasOn = now;
     }
     document.addEventListener('lure:settings', update);
+    document.addEventListener('visibilitychange', update);
     new MutationObserver(update).observe(dive, { attributes: true, attributeFilter: ['data-bg', 'class'] });
   })();
 
