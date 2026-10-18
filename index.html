@@ -1224,8 +1224,14 @@
     90% { transform: scale(0.88, 0.94); }
     100% { opacity: 1; transform: scale(1); }
   }
-  .card > .card-over { position: absolute; left: 60.635%; top: 8.782%; width: 36.621%; height: 83.569%; max-width: none; filter: none; opacity: 0; transition: opacity 0.35s ease; }
-  .card > .card-over.is-in { opacity: 1; }
+  /* The new portrait fades in over the old one. Its edges are feathered into the paper (identical on both cards), so no hard rectangle can show */
+  .card > .card-over {
+    position: absolute; left: 60.635%; top: 8.782%; width: 36.621%; height: 83.569%; max-width: none; filter: none; opacity: 0;
+    -webkit-mask-image: linear-gradient(to right, transparent, #000 1.4%, #000 98.6%, transparent), linear-gradient(to bottom, transparent, #000 1.2%, #000 98.8%, transparent);
+    -webkit-mask-composite: source-in;
+    mask-image: linear-gradient(to right, transparent, #000 1.4%, #000 98.6%, transparent), linear-gradient(to bottom, transparent, #000 1.2%, #000 98.8%, transparent);
+    mask-composite: intersect;
+  }
   .card.is-hit { animation: card-hit 0.28s ease-out; }
   @keyframes card-hit {
     0% { transform: translate(-50%, var(--card-settle)); }
@@ -2412,23 +2418,30 @@
       card.append(check);
 
       const land = () => {
-        /* The completed card dissolves in quickly on top; the check stays put above it,
-           and the paper is identical, so only the portrait visibly changes */
+        /* The new portrait fades in on top (only once it's fully decoded, so it can't pop in half-loaded).
+           Then the card underneath swaps to the completed version and the overlay is removed */
         const over = new Image();
         over.className = 'card-over';
         over.alt = '';
         over.src = 'assets/portrait-anglerfish-done.png';
         cardImg.after(over);
-        requestAnimationFrame(() => over.classList.add('is-in'));
-        setTimeout(() => {
-          showCardState();
-          researchLabel.textContent = caseView.classList.contains('is-research') ? 'Research Again' : 'Research';
-          over.remove();
-          check.remove();
-        }, quick ? 0 : 380);
         if (!quick) {
           burst(card);
+          card.animate(
+            [{ translate: '0 0' }, { translate: '4px 5px', offset: 0.25 }, { translate: '-3px -2px', offset: 0.55 }, { translate: '0 0' }],
+            { duration: 280, easing: 'ease-out' }
+          );
         }
+        const ready = Promise.all([over.decode(), doneImg.decode()]).catch(() => {});
+        ready.then(() => {
+          const fade = over.animate([{ opacity: 0 }, { opacity: 1 }], { duration: quick ? 300 : 650, easing: 'ease-in-out', fill: 'forwards' });
+          fade.onfinish = () => {
+            showCardState();
+            researchLabel.textContent = caseView.classList.contains('is-research') ? 'Research Again' : 'Research';
+            check.remove();
+            requestAnimationFrame(() => requestAnimationFrame(() => over.remove()));
+          };
+        });
         showButton();
       };
       const go = () => {
