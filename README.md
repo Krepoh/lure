@@ -1,6 +1,6 @@
 # LURE
 
-Lure is an interactive deep-sea exploration of deceptive design.
+LURE is an interactive deep-sea exploration of deceptive design.
 
 Just as an anglerfish uses a glowing lure to attract prey, digital interfaces frequently use confusing or misleading visuals to trick people into making decisions they wouldn't otherwise make.
 
