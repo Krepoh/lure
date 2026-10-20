@@ -52,7 +52,7 @@
     --wobble: 16px;
     --wobble-sm: 10px;
     --ease-gear: cubic-bezier(0.65, 0, 0.35, 1);
-    --stage-w: clamp(100vw, 160vh, 125vw);
+    --stage-w: clamp(100vw, 160dvh, 125vw);
     --desk-drop: 6%;
     color-scheme: dark;
   }
@@ -85,7 +85,7 @@
   .ray {
     position: absolute;
     top: -15%;
-    height: 85vh;
+    height: 85dvh;
     background: linear-gradient(to bottom, rgba(150, 235, 225, 0.16), rgba(150, 235, 225, 0.05) 55%, transparent 85%);
     filter: blur(22px);
     transform-origin: top center;
@@ -162,7 +162,7 @@
   }
 
   .logo {
-    transform: translateY(calc(max(0px, calc(var(--stage-w) * 0.625 - 100vh)) - 7.5%)) scale(0.85);
+    transform: translateY(calc(max(0px, calc(var(--stage-w) * 0.625 - 100dvh)) - 7.5%)) scale(0.85);
     transform-origin: 50% 21.6%;
     animation: logo-breathe 6s ease-in-out infinite;
   }
@@ -369,12 +369,12 @@
 
   /* ---------- Case file view: folder rises, card slides out between tab and front, folder drops away ---------- */
   :root {
-    --card-w: min(78vw, 120vh);
+    --card-w: min(78vw, 120dvh);
     --card-h: calc(var(--card-w) / 1.6516);
-    --card-top: 5vh;
+    --card-top: 5dvh;
     --fold-w: calc(var(--card-w) * 1.01);
     --fold-h: calc(var(--fold-w) * 0.647);
-    --fold-top: calc(100vh - var(--fold-h) * 0.25);
+    --fold-top: calc(100dvh - var(--fold-h) * 0.25);
     --card-start: calc(var(--fold-top) + var(--fold-h) * 0.08 - var(--card-top));
     --note-scale: 1;
   }
@@ -419,7 +419,7 @@
   .fold-front { z-index: 3; filter: drop-shadow(0 -6px 18px rgba(0, 0, 0, 0.35)); }
   .is-entered .fold { transform: translate(-50%, 0); opacity: 1; }
   .is-folder-away .fold {
-    transform: translate(-50%, calc(100vh - var(--fold-top) + 40px));
+    transform: translate(-50%, calc(100dvh - var(--fold-top) + 40px));
     transition: transform 0.7s cubic-bezier(0.55, 0, 1, 0.45);
   }
 
@@ -463,7 +463,7 @@
     position: absolute;
     z-index: 4;
     left: 50%;
-    top: calc(var(--card-top) + var(--card-h) + 3.5vh);
+    top: calc(var(--card-top) + var(--card-h) + 3.5dvh);
     display: inline-flex;
     align-items: center;
     gap: 0.6rem;
@@ -592,15 +592,16 @@
   html[data-effects="reduce"] .dive { background-color: #0A1820; }
   html[data-effects="reduce"] .dive.is-lit { background-color: #0E2733; }
 
+  /* Fixed, so it stays put when a short screen has to scroll */
   .surface-btn {
-    position: absolute;
+    position: fixed;
     z-index: 5;
     top: calc(16px + env(safe-area-inset-top, 0px));
     left: calc(16px + env(safe-area-inset-left, 0px));
     font-size: 1.2rem;
   }
   .depth-label {
-    position: absolute;
+    position: fixed;
     top: calc(24px + env(safe-area-inset-top, 0px));
     left: 50%;
     transform: translateX(-50%);
@@ -854,7 +855,7 @@
   /* Case resolved */
   .resolved-grid { display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); gap: clamp(1.5rem, 4vw, 3rem); align-items: center; max-width: 76rem; margin: 1.6rem auto 0; }
   .resolved-grid > * { min-width: 0; }
-  .card-static { --card-w: min(44vw, 92vh); position: relative; width: var(--card-w); max-width: 100%; aspect-ratio: 1166 / 706; margin: 0 auto; }
+  .card-static { --card-w: min(44vw, 92dvh); position: relative; width: var(--card-w); max-width: 100%; aspect-ratio: 1166 / 706; margin: 0 auto; }
   .card-static > img { display: block; width: 100%; height: 100%; filter: drop-shadow(0 10px 24px rgba(0, 0, 0, 0.45)); }
   .stamp {
     position: absolute;
@@ -880,9 +881,9 @@
   .lesson { margin-top: 0.4rem; font-size: 1.35rem !important; color: var(--sea-text) !important; }
   html[data-font="clear"] .lesson { font-size: 1.05rem !important; }
 
-  @media (max-width: 860px) {
+  @media (max-width: 860px) and (orientation: portrait) {
     .reveal-grid, .lab-grid, .resolved-grid { grid-template-columns: minmax(0, 1fr); }
-    .card-static { --card-w: min(92vw, 90vh); }
+    .card-static { --card-w: min(92vw, 90dvh); }
     .offer-stage { padding: 1.5rem 2.4rem; }
   }
 
@@ -910,7 +911,7 @@
   .no-anim, .no-anim *, .no-anim *::before, .no-anim *::after { transition: none !important; }
 
   /* Once the folder drops away, the card and Research button settle lower on the screen */
-  :root { --card-settle: max(3.5vh, calc((100vh - var(--card-h) - 13vh) / 2 - var(--card-top))); }
+  :root { --card-settle: max(3.5dvh, calc((100dvh - var(--card-h) - 13dvh) / 2 - var(--card-top))); }
   .is-settled .card { transform: translate(-50%, var(--card-settle)); transition: transform 0.8s var(--ease-gear); }
   .research-btn { transform: translate(-50%, calc(var(--card-settle) + 10px)); }
   .is-research .research-btn { transform: translate(-50%, var(--card-settle)); }
@@ -1007,7 +1008,7 @@
   .reveal-layout + .screen-actions { margin-top: 0.6rem; }
   .reveal-layout .offer-stage { padding-block: 0.4rem; }
   .receipt-bar { margin-top: 0.7rem; }
-  @media (max-width: 1050px) {
+  @media (max-width: 1050px) and (orientation: portrait) {
     .reveal-layout { grid-template-columns: minmax(0, 31rem); }
     .reveal-layout .offer-stage { order: -1; }
   }
@@ -1133,8 +1134,8 @@
     position: fixed;
     left: 50%;
     top: 50%;
-    width: max(100vw, 160vh);
-    height: max(100vh, 62.5vw);
+    width: max(100vw, 160dvh);
+    height: max(100dvh, 62.5vw);
     transform: translate(-50%, -50%);
     z-index: -1;
     pointer-events: none;
@@ -1535,6 +1536,63 @@
   html[data-effects="reduce"] .setting p { color: #E2F0F0; }
   html[data-effects="reduce"] .settings-btn img { filter: brightness(1.8); }
   html[data-effects="reduce"] .hint { color: #FFFFFF; }
+
+  /* ---------- Phones and tablets ---------- */
+  /* The page itself never scrolls or zooms out: the wide desk scene and the off-screen arrows are trimmed
+     to the screen, so touch browsers don't shrink everything to fit them */
+  html { overflow: hidden; }
+  body { position: fixed; inset: 0; height: auto; overflow: hidden; overflow: clip; overscroll-behavior: none; contain: paint; }
+
+  /* Short landscape screens (phones on their side): everything a little smaller, with tighter margins */
+  @media (orientation: landscape) and (max-height: 560px) {
+    .research-btn { font-size: 2rem; padding: 0.3rem 2.2rem 0.45rem 1.8rem; }
+    .research-btn svg { width: 1.7rem; height: 1.7rem; }
+    html[data-font="clear"] .research-btn { font-size: 1.5rem; }
+    .disclaimer { font-size: 0.85rem; }
+    .receipt-bar { margin-top: 0.45rem; }
+    .reveal-layout { margin-top: 0.9rem; }
+    .reveal-layout + .screen-actions { margin-top: 0.3rem; }
+    .reveal-actions { gap: 0.4rem; }
+    .lab-grid { margin-top: 0.7rem; }
+    :root { --card-w: min(78vw, 108dvh); }
+    .settings-btn { width: 44px; height: 44px; top: calc(8px + env(safe-area-inset-top, 0px)); }
+    .panel { top: calc(54px + env(safe-area-inset-top, 0px)); max-height: calc(100% - 64px); }
+    .back-btn, .surface-btn { top: calc(10px + env(safe-area-inset-top, 0px)); }
+    .screen { padding-top: calc(44px + env(safe-area-inset-top, 0px)); padding-bottom: 12px; }
+    .depth-label { top: calc(16px + env(safe-area-inset-top, 0px)); }
+    .disclaimer { bottom: 6px; }
+  }
+  /* When a screen is scaled to fit, the trick cards can use the spare width, so they're shorter */
+  .dive.is-fit .reveal-layout { grid-template-columns: minmax(0, 24rem) 35.2rem minmax(0, 24rem); max-width: 86rem; }
+
+  /* Phones held upright: ask to turn sideways */
+  .rotate-note { display: none; }
+  @media (orientation: portrait) and (max-width: 600px) {
+    .rotate-note {
+      position: fixed;
+      inset: 0;
+      z-index: 100;
+      display: grid;
+      place-content: center;
+      justify-items: center;
+      gap: 1.4rem;
+      padding: 24px;
+      background:
+        radial-gradient(ellipse 80% 50% at 50% 40%, rgba(46, 98, 110, 0.45), transparent 75%),
+        linear-gradient(to bottom, #183A48, #0E1A24 70%, #091118);
+      color: var(--sea-text);
+      font-family: var(--font-ui);
+      text-align: center;
+    }
+  }
+  .rotate-note svg { width: 6.5rem; height: 6.5rem; overflow: visible; }
+  .rotate-note .rn-phone { transform-box: fill-box; transform-origin: 50% 50%; animation: rn-turn 2.8s var(--ease-gear) infinite; }
+  @keyframes rn-turn { 0%, 20% { transform: rotate(0deg); } 50%, 75% { transform: rotate(-90deg); } 100% { transform: rotate(0deg); } }
+  html[data-motion="reduce"] .rotate-note .rn-phone { animation: none; transform: rotate(-90deg); }
+  .rotate-note h2 { margin: 0; font-weight: 400; font-size: 2rem; line-height: 1.1; color: var(--lure-hex); }
+  .rotate-note p { margin: 0; max-width: 18rem; font-size: 1.2rem; line-height: 1.4; color: var(--sea-muted); }
+  html[data-font="clear"] .rotate-note h2 { font-size: 1.6rem; font-weight: 700; }
+  html[data-font="clear"] .rotate-note p { font-size: 1rem; }
 </style>
 </head>
 <body>
@@ -1754,6 +1812,13 @@
 <p class="disclaimer">All subscriptions and offers in LURE are purely fictional and exploratory. Nothing can be purchased, and no information is collected.</p>
 <div class="fader" id="fader" aria-hidden="true"></div>
 <div class="tip" id="tip" role="tooltip"></div>
+<div class="rotate-note" role="status">
+  <svg viewBox="0 0 100 100" aria-hidden="true">
+    <rect class="rn-phone" x="32" y="14" width="36" height="72" rx="8" fill="#1D4155" stroke="#5FE3D0" stroke-width="4"/>
+  </svg>
+  <h2>Turn your phone sideways</h2>
+  <p>LURE is made for a wide screen. Rotate your phone to start the dive.</p>
+</div>
 
 <script>
   const root = document.documentElement;
@@ -2084,7 +2149,68 @@
       requestAnimationFrame(() => requestAnimationFrame(() => screen.classList.add('is-in')));
       screen.focus({ preventScroll: true });
       ({ lure: startLure, reveal: startReveal, lab: startLab })[name](carried);
+      fitScreen();
     }
+
+    /* Scale each screen to fit a wide-but-short window (phones on their side, tablets, small laptops)
+       instead of spilling off the bottom. Never larger than the normal size for the window, and never
+       so small the text gets hard to read: past that point the screen scrolls a little instead.
+       Upright windows keep the stacked layout and scroll instead. */
+    const FIT_WIDTH = { reveal: 960, lab: 860 };
+    const MIN_UI = 0.66;
+    function fitScreen() {
+      const screen = screens.find((s) => !s.hidden);
+      dive.style.removeProperty('--ui');
+      const W = dive.clientWidth, H = dive.clientHeight;
+      dive.classList.remove('is-fit');
+      if (!screen || !dive.classList.contains('is-active') || H > W) return;
+      const max = parseFloat(getComputedStyle(dive).getPropertyValue('--ui')) || 1.12;
+      const cs = getComputedStyle(screen);
+      const padTop = parseFloat(cs.paddingTop), padBottom = parseFloat(cs.paddingBottom);
+      const contentHeight = () => {
+        const top = screen.getBoundingClientRect().top + padTop;
+        let bottom = top;
+        [...screen.children].forEach((el) => {
+          const pos = getComputedStyle(el).position;
+          if (pos === 'absolute' || pos === 'fixed' || el.classList.contains('sr-only')) return;
+          const r = el.getBoundingClientRect();
+          if (r.height) bottom = Math.max(bottom, r.bottom);
+        });
+        return bottom - top;
+      };
+      let ui = Math.min(max, (W - 32) / (FIT_WIDTH[screen.dataset.stage] || 1000));
+      const floor = Math.min(ui, MIN_UI);
+      const avail = H - padTop - padBottom - 8;
+      /* Text rewraps as the scale changes, so search for the largest scale that fits */
+      const fits = (u) => { dive.style.setProperty('--ui', u.toFixed(3)); return contentHeight() <= avail; };
+      /* If it doesn't fit as is, let the trick cards spread into the spare width first, then shrink */
+      if (!fits(ui)) dive.classList.add('is-fit');
+      if (!fits(ui)) {
+        let lo = floor, hi = ui;
+        for (let i = 0; i < 7; i++) {
+          const mid = (lo + hi) / 2;
+          if (fits(mid)) lo = mid; else hi = mid;
+        }
+        dive.style.setProperty('--ui', lo.toFixed(3));
+      }
+      /* While the offer is on its own in the dark, keep it centered even if the screen has to scroll */
+      if (screen.classList.contains('is-luring')) {
+        const offer = screen.querySelector('.reveal-slot .offer');
+        if (offer) {
+          const r = offer.getBoundingClientRect(), d = dive.getBoundingClientRect();
+          dive.scrollTop += (r.top + r.height / 2) - (d.top + H / 2);
+        }
+      }
+    }
+    let fitQueued = false;
+    const queueFit = () => {
+      if (fitQueued) return;
+      fitQueued = true;
+      requestAnimationFrame(() => { fitQueued = false; fitScreen(); });
+    };
+    window.addEventListener('resize', queueFit);
+    document.addEventListener('lure:settings', queueFit);
+    if (document.fonts) document.fonts.ready.then(queueFit);
 
 
     /* The lure: the deceptive offer */
@@ -2119,6 +2245,7 @@
       /* 2. The dark painting dissolves into the lit one, revealing the anglerfish */
       later(() => {
         screenEl.classList.add('is-holding');
+        dive.scrollTop = 0;
         armFx(screenEl);
         screenEl.classList.remove('is-luring', 'lure-leaving', 'enter-anim');
         dive.classList.add('is-lit', 'keep-dark');
