@@ -25,3 +25,4 @@ Code written with help from Claude by Anthropic.
 Fonts: Patrick Hand and Atkinson Hyperlegible.
 
 Made for Technica 2026: Dare to Dive.
+Won Fin-tastic Design: Best UI/UX Hack! 
